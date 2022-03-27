@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {{template "head.html" .}}
+
+    <script>
+
+        function setError(value) {
+
+            const formError = document.getElementById("form-error");
+            if (value === "") {
+                hideElement(formError);
+            } else {
+                formError.innerText = value;
+                showElement(formError);
+            }
+
+        }
+
+        function registerNewPlayer(event) {
+
+            event.preventDefault();
+            setError("");
+            fetch("/players/register", {
+
+                method: "post",
+                body: JSON.stringify({
+                    name: document.getElementById("player-name").value,
+                }),
+
+            }).
+                then(response => response.json()).
+                then(data => {
+
+                    if (data.Error) {
+                        setError(data.Error);
+                        return;
+                    }
+                    hideElement(document.getElementById("register-player-button"));
+                    document.getElementById("player-password").value = data.Password;
+                    showElement(document.getElementById("li-password"));
+                    showElement(document.getElementById("login-player-button"));
+
+                }).
+                catch(error => {
+
+                    console.error(error);
+
+                });
+
+            const playerForm = document.getElementById("player-form");
+            playerForm.removeEventListener("submit", registerNewPlayer);
+            playerForm.addEventListener("submit", loginPlayer);
+
+            return false;
+
+        }
+
+        function loginPlayer(event) {
+
+            event.preventDefault();
+            setError("");
+            fetch("/players/login", {
+
+                method: "post",
+                body: JSON.stringify({
+                    Name: document.getElementById("player-name").value,
+                    Password: document.getElementById("player-password").value,
+                }),
+
+            }).
+                then(response => response.json()).
+                then(data => {
+
+                    setCookie("playerSession", data.Session, 300, "/");
+                    window.location.replace("/game.html");
+
+                }).
+                catch(error => {
+
+                    console.error(error);
+
+                });
+            return false;
+
+        }
+
+        function init() {
+
+            document.getElementById("player-form").addEventListener("submit", registerNewPlayer);
+
+        }
+
+    </script>
+
+</head>
+
+<body onload="init()">
+    {{template "header.html" .}}
+    <section class="main-content">
+        <form id="player-form">
+            <ul>
+                <li>
+                    <p><label for="player-name">New Player Name:</label></p>
+                    <input class="padded-field" type="text" name="name" id="player-name" required>
+                </li>
+                <li class="hidden" id="li-password">
+                    <p><label for="player-password">Password (already set for you):</label></p>
+                    <input class="padded-field" type="password" name="password" id="player-password">
+                </li>
+                <li>
+                    <button type="submit" class="padded-field" id="register-player-button">Register</button>
+                    <button type="submit" class="padded-field hidden" id="login-player-button">Login</button>
+                </li>
+                <li>
+                    <p class="hidden" id="form-error"></p>
+                </li>
+            </ul>
+        </form>
+    </section>
+    {{template "footer.html" .}}
+</body>
+
+</html>

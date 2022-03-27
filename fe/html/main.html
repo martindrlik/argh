@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    {{template "head.html" .}}
+    <script src="player.js"></script>
+    <script>
+        let player;
+
+        function init() {
+
+            loadPlayer().then(data => {
+
+                player = data;
+                if (data.PlayerName) {
+
+                    showElement(document.getElementById("continue-playing-li"));
+
+                }
+
+            });
+
+        }
+
+    </script>
+</head>
+
+<body onload="init()">
+    {{template "header.html" .}}
+    <nav class="main-content">
+        <ul>
+            <li class="hidden" id="continue-playing-li"><a href="game.html" class="main-link">Continue Playing</a></li>
+            <li><a href="login.html" class="main-link">Login</a></li>
+            <li><a href="register-new-player.html" class="main-link">Register New Player</a></li>
+        </ul>
+    </nav>
+    {{template "footer.html" .}}
+</body>
+
+</html>

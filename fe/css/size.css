@@ -1,0 +1,13 @@
+body {
+    font-size: 1.4rem;
+}
+
+.padded-field {
+    padding: 6px;
+    font-size: 2rem;
+}
+
+.main-content {
+    max-width: 600px;
+    margin: auto;
+}

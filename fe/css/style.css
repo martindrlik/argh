@@ -1,0 +1,11 @@
+form button {
+    border: none;
+}
+
+form li {
+    list-style-type: none;
+}
+
+.hidden {
+    display: none;
+}

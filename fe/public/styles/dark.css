@@ -1,0 +1,13 @@
+a {
+    color: pink;
+}
+
+body {
+    background-color: black;
+    color: white;
+}
+
+input {
+    background-color: inherit;
+    color: palevioletred;
+}

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    {{template "stylesheets.html" .}}
+    <meta charset="UTF-8">
+    {{template "scripts.html"}}
+    <title>{{template "title"}}</title>
+
+</head>
+
+<body>
+    
+    <header class="main-content">
+        <h1>{{template "title"}}</h1>
+    </header>
+
+    <nav class="main-content">
+        <ul>
+            <li><a href="player-register.html">New Player</a></li>
+        </ul>
+    </nav>
+    {{template "footer.html" .}}
+
+</body>
+
+</html>

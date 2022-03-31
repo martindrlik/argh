@@ -1,4 +1,4 @@
-async function login(name, password) {
+async function loginPlayer(name, password) {
 
     const response = await fetch("/players/login", {
 

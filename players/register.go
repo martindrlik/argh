@@ -12,40 +12,45 @@ import (
 
 func register(rw http.ResponseWriter, r *http.Request) {
 	p, ok := payload.TryDecode(rw, r, &struct {
-		Name string
+		Name     string
+		Password string
 	}{})
 	if !ok {
 		return
 	}
-	password, ok := tryRegisterPlayer(rw, r, p.Name)
-	if !ok {
+	session := rands.Random(48)
+	if !tryRegisterPlayer(
+		rw,
+		r,
+		p.Name,
+		p.Password,
+		session) {
 		return
 	}
-	if !payload.TryEncode(rw, r, struct {
-		Password string
-	}{password}) {
-		return
-	}
+	http.SetCookie(rw, &http.Cookie{
+		Name:   "playerSession",
+		MaxAge: 360,
+		Value:  session,
+	})
 }
 
 type registerData struct {
 	name         string
-	session      Session
+	session      string
 	passwordHash []byte
-	passwordSalt string
+	passwordSalt []byte
 	result       chan error
 }
 
-func tryRegisterPlayer(rw http.ResponseWriter, r *http.Request, name string) (string, bool) {
+func tryRegisterPlayer(rw http.ResponseWriter, r *http.Request, name, password, session string) bool {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	session := Session(rands.Random(16))
-	password, salt, passwordHash, err := genPassword()
+	hash, salt, err := hashPassword(password)
 	if err != nil {
 		log.Printf("%v: unable to generate session for new player %q: %v", r.URL, name, err)
 		failedToRegisterNewPlayer(rw, r)
-		return "", false
+		return false
 	}
 	result := make(chan error)
 
@@ -53,26 +58,26 @@ func tryRegisterPlayer(rw http.ResponseWriter, r *http.Request, name string) (st
 	case global.registerChannel <- registerData{
 		name,
 		session,
-		passwordHash,
+		hash,
 		salt,
 		result}:
 	case <-ctx.Done():
 		log.Printf("%v: register new player %q: %v", r.URL, name, ctx.Err())
 		failedToRegisterNewPlayer(rw, r)
-		return "", false
+		return false
 	}
 	select {
 	case err := <-result:
 		if err == nil {
-			return password, true
+			return true
 		}
 		log.Printf("%v: register new player %q: %v", r.URL, name, err)
-		failedToRegisterNewPlayer(rw, r)
+		payload.EncodeError(rw, r, err.Error(), http.StatusBadRequest)
 	case <-ctx.Done():
 		log.Printf("%v: register new player %q: %v", r.URL, name, ctx.Err())
 
 	}
-	return "", false
+	return false
 }
 
 func failedToRegisterNewPlayer(rw http.ResponseWriter, r *http.Request) {

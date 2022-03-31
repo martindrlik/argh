@@ -4,3 +4,10 @@ async function randomPassword() {
     return await response.json();
 
 }
+
+async function setRandomPassword(id) {
+
+    const d = await randomPassword();
+    document.getElementById(id).value = d.Value;
+
+}

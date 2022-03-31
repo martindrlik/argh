@@ -5,13 +5,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func genPassword() (password, salt string, passwordHash []byte, err error) {
-	password = rands.Password()
-	salt = rands.Random(5)
-	passwordHash, err = bcrypt.GenerateFromPassword([]byte(password+salt), 14)
+func hashPassword(password string) (hash, salt []byte, err error) {
+	s := rands.Random(5)
+	salt = []byte(s)
+	hash, err = bcrypt.GenerateFromPassword([]byte(password+s), 14)
 	return
 }
 
-func checkPassword(password, salt string, passwordHash []byte) error {
-	return bcrypt.CompareHashAndPassword(passwordHash, []byte(password+salt))
+func checkPassword(password string, salt, passwordHash []byte) error {
+	return bcrypt.CompareHashAndPassword(passwordHash, []byte(password+string(salt)))
 }

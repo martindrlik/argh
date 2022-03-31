@@ -25,24 +25,19 @@ func login(rw http.ResponseWriter, r *http.Request) {
 		failedToLoginPlayer(rw, r, http.StatusBadRequest)
 		return
 	}
-	if !payload.TryEncode(rw, r, struct {
-		Session Session
-	}{session}) {
-		return
-	}
 }
 
 type loginData struct {
 	name     string
 	password string
-	result   chan Session
+	result   chan string
 }
 
-func tryLoginPlayer(rw http.ResponseWriter, r *http.Request, name, password string) (Session, bool) {
+func tryLoginPlayer(rw http.ResponseWriter, r *http.Request, name, password string) (string, bool) {
 	ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 	defer cancel()
 
-	result := make(chan Session)
+	result := make(chan string)
 	select {
 	case global.loginChannel <- loginData{
 		name,

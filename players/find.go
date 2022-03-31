@@ -19,7 +19,7 @@ func tryFindPlayerBySession(r *http.Request) (string, *Player, bool) {
 	result := make(chan findResult)
 	select {
 	case global.findChannel <- find{
-		session: Session(c.Value),
+		session: c.Value,
 		ctx:     ctx,
 		result:  result}:
 	case <-ctx.Done():
@@ -61,7 +61,7 @@ type findResult struct {
 }
 
 type find struct {
-	session Session
+	session string
 	name    string
 	ctx     context.Context
 	result  chan findResult

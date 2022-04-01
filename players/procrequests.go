@@ -2,9 +2,13 @@ package main
 
 import (
 	"log"
+
+	"github.com/martindrlik/argh/synapse"
 )
 
-var global = struct {
+var g = struct {
+	consumer        *synapse.Consumer
+	producer        *synapse.Producer
 	registerChannel chan registerData
 	loginChannel    chan loginData
 	findChannel     chan find
@@ -12,6 +16,8 @@ var global = struct {
 	byName    map[string]*Player
 	bySession map[string]string
 }{
+	consumer:        must(synapse.NewConsumer()),
+	producer:        must(synapse.NewProducer()),
 	registerChannel: make(chan registerData),
 	loginChannel:    make(chan loginData),
 	findChannel:     make(chan find),
@@ -28,25 +34,32 @@ func init() {
 	}()
 }
 
+func must[T any](v T, err error) T {
+	if err != nil {
+		panic(err)
+	}
+	return v
+}
+
 func procRequests() {
 	select {
-	case s := <-global.registerChannel:
-		if _, ok := global.byName[s.name]; ok {
+	case s := <-g.registerChannel:
+		if _, ok := g.byName[s.name]; ok {
 			s.result <- ErrAlreadyTaken
 		} else {
-			global.byName[s.name] = &Player{
+			g.byName[s.name] = &Player{
 				PasswordHash: s.passwordHash,
 				PasswordSalt: s.passwordSalt,
 				Session:      s.session,
 			}
-			global.bySession[s.session] = s.name
+			g.bySession[s.session] = s.name
 			log.Printf("player %q registered 🎉", s.name)
 		}
 		close(s.result)
-	case s := <-global.findChannel:
+	case s := <-g.findChannel:
 		findPlayer(s)
-	case s := <-global.loginChannel:
-		p, ok := global.byName[s.name]
+	case s := <-g.loginChannel:
+		p, ok := g.byName[s.name]
 		if !ok {
 			log.Printf("unable to find player %q", s.name)
 		} else if err := checkPassword(

@@ -18,7 +18,7 @@ func tryFindPlayerBySession(r *http.Request) (string, *Player, bool) {
 
 	result := make(chan findResult)
 	select {
-	case global.findChannel <- find{
+	case g.findChannel <- find{
 		session: c.Value,
 		ctx:     ctx,
 		result:  result}:
@@ -38,13 +38,13 @@ func tryFindPlayerBySession(r *http.Request) (string, *Player, bool) {
 func findPlayer(f find) {
 	defer close(f.result)
 	if f.session != "" {
-		name, ok := global.bySession[f.session]
+		name, ok := g.bySession[f.session]
 		if ok {
 			f.name = name
 		}
 	}
 	if f.name != "" {
-		p, ok := global.byName[f.name]
+		p, ok := g.byName[f.name]
 		if ok {
 			select {
 			case f.result <- findResult{f.name, p}:

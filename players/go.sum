@@ -1,3 +1,7 @@
+github.com/confluentinc/confluent-kafka-go v1.8.2 h1:PBdbvYpyOdFLehj8j+9ba7FL4c4Moxn79gy9cYKxG5E=
+github.com/confluentinc/confluent-kafka-go v1.8.2/go.mod h1:u2zNLny2xq+5rWeTQjFHbDzzNuba4P1vo31r9r4uAdg=
+github.com/martindrlik/argh/events v0.0.0-20220401203227-338eb56faa5e h1:We7RuD55wDbOgjrwJo6bzNDzH1lGobSOWbaajYqzGAA=
+github.com/martindrlik/argh/events v0.0.0-20220401203227-338eb56faa5e/go.mod h1:px3JouGRjGL7oUwlIsP81BfuHVUdDzywvljJKsxPHP0=
 github.com/martindrlik/argh/payload v0.0.0-20220327154408-029adac53420 h1:5vsxpomNRQouZr0jt1W6Wvi36pohi+yJhdLnyc6TN+8=
 github.com/martindrlik/argh/payload v0.0.0-20220327154408-029adac53420/go.mod h1:nYgpk2qiZ36tYOgnXfwu9krEtDoTcmPQ0ToZQXUXYg4=
 github.com/martindrlik/argh/rands v0.0.0-20220327154408-029adac53420 h1:ynk7aIma+Te37TBysRvUMW7FtOnGRdyjjWNkwKl65XE=

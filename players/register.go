@@ -27,6 +27,11 @@ func register(rw http.ResponseWriter, r *http.Request) {
 		session) {
 		return
 	}
+	if err := g.producer.Produce("sessions", []byte(p.Name), []byte(session)); err != nil {
+		log.Printf("unable to produce session message: %v", err)
+		http.Error(rw, "", http.StatusInternalServerError)
+		return
+	}
 	http.SetCookie(rw, &http.Cookie{
 		Name:   "playerSession",
 		MaxAge: 360,
@@ -55,7 +60,7 @@ func tryRegisterPlayer(rw http.ResponseWriter, r *http.Request, name, password, 
 	result := make(chan error)
 
 	select {
-	case global.registerChannel <- registerData{
+	case g.registerChannel <- registerData{
 		name,
 		session,
 		hash,

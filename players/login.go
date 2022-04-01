@@ -39,7 +39,7 @@ func tryLoginPlayer(rw http.ResponseWriter, r *http.Request, name, password stri
 
 	result := make(chan string)
 	select {
-	case global.loginChannel <- loginData{
+	case g.loginChannel <- loginData{
 		name,
 		password,
 		result}:

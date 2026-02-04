@@ -6,9 +6,15 @@ const nextf = float.next;
 
 const V = @This();
 
-pub const zero = vec(0, 0);
+pub const z = vec(0, 0);
 pub const small = vec(40, 40);
-pub const screen = vec(800, 800);
+pub const big = small.m1(2);
+
+pub const screen_x_small_fit_times = 20;
+pub const screen_y_small_fit_times = 10;
+pub const screen_x_big_fit_times = 10;
+pub const screen_y_big_fit_times = 5;
+pub const screen = small.m2(screen_x_small_fit_times, screen_y_small_fit_times);
 
 pub const slow = vec(1, 1);
 pub const fast = vec(4, 4);
@@ -21,6 +27,22 @@ pub fn vec(x: F, y: F) V {
     return .{ .x = x, .y = y };
 }
 
+pub fn m1(v: V, f: F) V {
+    return v.mx(f).my(f);
+}
+
+pub fn m2(v: V, x: F, y: F) V {
+    return v.mx(x).my(y);
+}
+
+pub fn mx(v: V, f: F) V {
+    return vec(v.x * f, v.y);
+}
+
+pub fn my(v: V, f: F) V {
+    return vec(v.x, v.y * f);
+}
+
 pub fn in(size: V, x: F, y: F) V {
     return vec(
         if (x + size.x > screen.x) screen.x - size.x else if (x < 0) 0 else x,
@@ -31,8 +53,8 @@ pub fn in(size: V, x: F, y: F) V {
 test in {
     const u = in(.small, -100, -100);
     const v = in(.small, screen.x, screen.y);
-    try std.testing.expectEqual(zero.x, u.x);
-    try std.testing.expectEqual(zero.y, u.y);
+    try std.testing.expectEqual(z.x, u.x);
+    try std.testing.expectEqual(z.y, u.y);
     try std.testing.expectEqual(screen.x - small.x, v.x);
     try std.testing.expectEqual(screen.y - small.y, v.y);
 }

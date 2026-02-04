@@ -13,7 +13,7 @@ pub fn state(pos: V, vel: V) S {
 }
 
 pub fn still(pos: V) S {
-    return .state(pos, .zero);
+    return .state(pos, .z);
 }
 
 pub fn slow(pos: V) S {

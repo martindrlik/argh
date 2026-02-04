@@ -1,5 +1,6 @@
 const std = @import("std");
 const argh = @import("argh");
+const rainbow = @import("scene/rainbow.zig");
 
 pub fn main() !void {
     argh.initWindow(
@@ -11,39 +12,27 @@ pub fn main() !void {
 
     argh.setTargetFps(60);
 
-    var player = argh.O.object(.still(.zero), .small, argh.blue);
-
-    var player_anim = [_]argh.S{
-        .slow(.in(.small, argh.V.screen.x, 0)),
-        .fast(.in(.small, argh.V.screen.x, argh.V.screen.y)),
-        .sonic(.in(.small, 0, argh.V.screen.y)),
-        .slow(.zero),
-    };
-
-    var enemy = argh.O.object(
-        .slow(.in(.small, argh.V.screen.x, argh.V.screen.y)),
-        .small,
-        argh.red,
-    );
-
-    var enemy_anim = [_]argh.S{
-        .fast(.in(.small, 0, argh.V.screen.y)),
-        .slow(.zero),
-        .slow(.in(.small, argh.V.screen.x, 0)),
-        .sonic(.in(.small, argh.V.screen.x, argh.V.screen.y)),
-    };
-
-    player.setAnimation(&player_anim);
-    enemy.setAnimation(&enemy_anim);
+    var snake = rainbow.snake().create();
+    const fg = foreground(){};
 
     while (!argh.windowShouldClose()) {
-        player.update();
-        enemy.update();
+        snake.update();
 
         argh.beginDrawing();
         argh.clearBackground(argh.black);
-        player.draw();
-        enemy.draw();
+        snake.draw();
+        fg.draw();
         argh.endDrawing();
     }
+}
+
+fn foreground() type {
+    const argh_text = argh.text.static("argh!", 100, 100, .large){};
+    const lets_go_have_some_adventures_together_text = argh.text.static("Let's go have some adventures together!", 100, 150, .medium){};
+    return struct {
+        pub fn draw(_: @This()) void {
+            argh_text.draw();
+            lets_go_have_some_adventures_together_text.draw();
+        }
+    };
 }

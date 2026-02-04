@@ -8,6 +8,8 @@ pub const S = @import("State.zig");
 pub const O = @import("Object.zig");
 pub const V = @import("Vec.zig");
 
+pub const text = @import("text.zig");
+
 pub const Camera2D = c.Camera2D;
 pub const Color = c.Color;
 pub const Font = c.Font;
@@ -26,6 +28,7 @@ pub const blue = c.BLUE;
 pub const checkCollisionRecs = c.CheckCollisionRecs;
 pub const clearBackground = c.ClearBackground;
 pub const closeWindow = c.CloseWindow;
+pub const colorFromHSV = c.ColorFromHSV;
 pub const drawFps = c.DrawFPS;
 pub const drawRectangleLinesEx = c.DrawRectangleLinesEx;
 pub const drawRectangleRec = c.DrawRectangleRec;
@@ -58,15 +61,19 @@ pub const loadFontEx = c.LoadFontEx;
 pub const loadRenderTexture = c.LoadRenderTexture;
 pub const loadShader = c.LoadShader;
 pub const loadTexture = c.LoadTexture;
+pub const magenta = c.MAGENTA;
+pub const orange = c.ORANGE;
 pub const raywhite = c.RAYWHITE;
 pub const red = c.RED;
 pub const setShaderValue = c.SetShaderValue;
 pub const setTargetFps = c.SetTargetFPS;
 pub const unloadShader = c.UnloadShader;
 pub const unloadTexture = c.UnloadTexture;
+pub const violet = c.VIOLET;
 pub const wait = c.WaitTime;
 pub const white = c.WHITE;
 pub const windowShouldClose = c.WindowShouldClose;
+pub const yellow = c.YELLOW;
 
 test {
     std.testing.refAllDecls(@This());

@@ -12,17 +12,18 @@ pub fn main() !void {
 
     argh.setTargetFps(60);
 
-    var snake = rainbow.snake().create();
     const fg = foreground(){};
+    var snake = rainbow.snake().create();
 
     while (!argh.windowShouldClose()) {
         snake.update();
 
         argh.beginDrawing();
         argh.clearBackground(argh.black);
-        snake.draw();
+        defer argh.endDrawing();
+
         fg.draw();
-        argh.endDrawing();
+        snake.draw();
     }
 }
 

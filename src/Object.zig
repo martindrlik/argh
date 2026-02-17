@@ -6,17 +6,14 @@ const O = @This();
 
 state: S,
 animation: ?[]const S = null,
-size: V,
 color: argh.Color,
 
 pub fn object(
     state: S,
-    size: V,
     color: argh.Color,
 ) O {
     return .{
         .state = state,
-        .size = size,
         .color = color,
     };
 }
@@ -44,10 +41,14 @@ pub fn draw(o: *const O) void {
 }
 
 pub fn rect(o: *const O) argh.Rectangle {
+    const pos: V = .{
+        .x = o.state.pos.x - o.state.size.x * o.state.origin.x,
+        .y = o.state.pos.y - o.state.size.y * o.state.origin.y,
+    };
     return .{
-        .x = o.state.pos.x,
-        .y = o.state.pos.y,
-        .width = o.size.x,
-        .height = o.size.y,
+        .x = pos.x,
+        .y = pos.y,
+        .width = o.state.size.x,
+        .height = o.state.size.y,
     };
 }

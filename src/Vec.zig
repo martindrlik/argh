@@ -8,17 +8,21 @@ const V = @This();
 
 pub const z = vec(0, 0);
 pub const small = vec(40, 40);
-pub const big = small.m1(2);
+pub const big = small.mul(.constant(2));
 
-pub const screen_x_small_fit_times = 20;
-pub const screen_y_small_fit_times = 10;
-pub const screen_x_big_fit_times = 10;
-pub const screen_y_big_fit_times = 5;
-pub const screen = small.m2(screen_x_small_fit_times, screen_y_small_fit_times);
+pub const small_fit_times = vec(20, 10);
+pub const big_fit_times = vec(10, 5);
+pub const screen = big.mul(big_fit_times);
+
+test "make sure duplicate numbers adds up" {
+    try std.testing.expectEqual(small_fit_times.mul(.small), big.big_fit_times.mul(.big));
+}
 
 pub const slow = vec(1, 1);
 pub const fast = vec(4, 4);
 pub const sonic = vec(16, 16);
+
+pub const center = vec(0.5, 0.5);
 
 x: F,
 y: F,
@@ -27,20 +31,15 @@ pub fn vec(x: F, y: F) V {
     return .{ .x = x, .y = y };
 }
 
-pub fn m1(v: V, f: F) V {
-    return v.mx(f).my(f);
+pub fn mul(u: V, v: V) V {
+    return vec(
+        u.x * v.x,
+        u.y * v.y,
+    );
 }
 
-pub fn m2(v: V, x: F, y: F) V {
-    return v.mx(x).my(y);
-}
-
-pub fn mx(v: V, f: F) V {
-    return vec(v.x * f, v.y);
-}
-
-pub fn my(v: V, f: F) V {
-    return vec(v.x, v.y * f);
+pub fn constant(f: F) V {
+    return vec(f, f);
 }
 
 pub fn in(size: V, x: F, y: F) V {

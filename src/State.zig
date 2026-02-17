@@ -2,36 +2,51 @@ const std = @import("std");
 const V = @import("Vec.zig");
 const S = @This();
 
-pos: V,
-vel: V,
+pos: V = .z,
+vel: V = .z,
+size: V = .big,
+origin: V = .center,
 
-pub fn state(pos: V, vel: V) S {
+pub fn init(pos: V) S {
     return .{
         .pos = pos,
-        .vel = vel,
     };
 }
 
-pub fn still(pos: V) S {
-    return .state(pos, .z);
+pub fn slow(s: S) S {
+    s.vel = .slow;
+    return s;
 }
 
-pub fn slow(pos: V) S {
-    return .state(pos, .slow);
+pub fn fast(s: S) S {
+    s.vel = .fast;
+    return s;
 }
 
-pub fn fast(pos: V) S {
-    return .state(pos, .fast);
+pub fn sonic(s: S) S {
+    var t = s;
+    t.vel = .sonic;
+    return t;
 }
 
-pub fn sonic(pos: V) S {
-    return .state(pos, .sonic);
+pub fn small(s: S) S {
+    var t = s;
+    t.size = .small;
+    return t;
+}
+
+pub fn screen(s: S) S {
+    var t = s;
+    t.size = .screen;
+    return t;
 }
 
 pub fn next(u: S, v: S) S {
+    // TODO need animation redesign
     return .{
         .pos = .next(u.pos, v.pos, v.vel),
-        .vel = .next(u.vel, v.vel, .fast), // improve this (acceleration)
+        .size = .next(u.size, v.size, v.vel),
+        .vel = u.vel,
     };
 }
 

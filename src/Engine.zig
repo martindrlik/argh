@@ -4,6 +4,7 @@ const Scene = @import("Scene.zig").Scene;
 const Duration = std.Io.Duration;
 const debug = @import("debug.zig");
 
+const max_physics_steps_per_frame: u32 = 5;
 pub const physics_step: std.Io.Duration = .fromNanoseconds((std.time.ns_per_s + 30) / 60);
 pub const physics_step_seconds = @as(f64, @floatFromInt(physics_step.nanoseconds)) / std.time.ns_per_s;
 
@@ -24,10 +25,13 @@ pub fn physicsStep(self: *Engine, elapsed: Duration) void {
     if (self.accumulator.nanoseconds < physics_step.nanoseconds) {
         debug.printPhysicsStepOmitted();
     }
-    while (self.accumulator.nanoseconds >= physics_step.nanoseconds) {
+    var remaining_physics_steps = max_physics_steps_per_frame;
+    while (self.accumulator.nanoseconds >= physics_step.nanoseconds and remaining_physics_steps > 0) {
         self.scene.physicsStep();
         self.accumulator.nanoseconds -= physics_step.nanoseconds;
+        remaining_physics_steps -= 1;
     }
+    self.accumulator.nanoseconds = @mod(self.accumulator.nanoseconds, physics_step.nanoseconds);
 }
 
 test physicsStep {

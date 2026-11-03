@@ -72,6 +72,14 @@ pub fn printPlayerJumpRequestConsumed() void {
     std.debug.print("player consumed the jump request\n", .{});
 }
 
+pub fn printPlayerLandRequestConsumed() void {
+    std.debug.print("player consumed the land request\n", .{});
+}
+
 pub fn printPlayerJumped() void {
     std.debug.print("player jumped\n", .{});
+}
+
+pub fn printPlayerLanded() void {
+    std.debug.print("player landed\n", .{});
 }

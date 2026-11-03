@@ -30,4 +30,15 @@ pub fn physicsStep(self: *Player, input: *Input) void {
             self.is_grounded = false;
         }
     }
+    if (input.consumeLandRequest()) {
+        if (self.is_airborne) {
+            debug.printPlayerLanded();
+            self.is_airborne = false;
+            self.is_grounded = true;
+        }
+    }
+}
+
+pub fn draw(self: *const Player, alpha: f64) void {
+    debug.printPlayer(self, alpha);
 }

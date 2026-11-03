@@ -17,6 +17,8 @@ pub fn main(init: std.process.Init) !void {
         if (input.takeLine(io)) |line| {
             if (Input.isJump(line)) {
                 input.is_jump_requested = true;
+            } else if (Input.isLand(line)) {
+                input.is_land_requested = true;
             } else if (Input.isQuit(line)) {
                 break;
             }

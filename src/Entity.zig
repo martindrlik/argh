@@ -20,8 +20,8 @@ pub const Entity = union(enum) {
 
     pub fn draw(self: *const Entity, alpha: f64) void {
         switch (self.*) {
-            .enemy => |*enemy| debug.printEnemy(enemy, alpha),
-            .player => |*player| debug.printPlayer(player, alpha),
+            .enemy => |*enemy| enemy.draw(alpha),
+            .player => |*player| player.draw(alpha),
         }
     }
 };

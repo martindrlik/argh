@@ -1,12 +1,13 @@
 const Entity = @import("Entity.zig").Entity;
+const Input = @import("Input.zig");
 
 pub const Scene = union(enum) {
     game: GameScene,
 
-    pub fn physicsStep(self: *Scene) void {
+    pub fn physicsStep(self: *Scene, input: *Input) void {
         switch (self.*) {
             .game => |*game| {
-                game.physicsStep();
+                game.physicsStep(input);
             },
         }
     }
@@ -21,15 +22,20 @@ pub const Scene = union(enum) {
 };
 
 const GameScene = struct {
-    entities: [1]Entity,
+    entities: [2]Entity,
 
     pub fn init() GameScene {
-        return .{ .entities = @splat(Entity{ .enemy = .init() }) };
+        return .{
+            .entities = .{
+                Entity{ .enemy = .init() },
+                Entity{ .player = .init() },
+            },
+        };
     }
 
-    pub fn physicsStep(self: *GameScene) void {
+    pub fn physicsStep(self: *GameScene, input: *Input) void {
         for (&self.entities) |*entity| {
-            entity.physicsStep();
+            entity.physicsStep(input);
         }
     }
 

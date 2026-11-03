@@ -1,9 +1,11 @@
-const Engine = @This();
 const std = @import("std");
-const Scene = @import("Scene.zig").Scene;
 const Duration = std.Io.Duration;
-const debug = @import("debug.zig");
 
+const debug = @import("debug.zig");
+const Input = @import("Input.zig");
+const Scene = @import("Scene.zig").Scene;
+
+const Engine = @This();
 const max_physics_steps_per_frame: u32 = 5;
 pub const physics_step: std.Io.Duration = .fromNanoseconds((std.time.ns_per_s + 30) / 60);
 pub const physics_step_seconds = @as(f64, @floatFromInt(physics_step.nanoseconds)) / std.time.ns_per_s;
@@ -17,7 +19,7 @@ pub fn init() Engine {
     };
 }
 
-pub fn physicsStep(self: *Engine, elapsed: Duration) void {
+pub fn physicsStep(self: *Engine, input: *Input, elapsed: Duration) void {
     self.accumulator.nanoseconds += elapsed.nanoseconds;
 
     debug.printAccumulator(self.accumulator);
@@ -27,7 +29,7 @@ pub fn physicsStep(self: *Engine, elapsed: Duration) void {
     }
     var remaining_physics_steps = max_physics_steps_per_frame;
     while (self.accumulator.nanoseconds >= physics_step.nanoseconds and remaining_physics_steps > 0) {
-        self.scene.physicsStep();
+        self.scene.physicsStep(input);
         self.accumulator.nanoseconds -= physics_step.nanoseconds;
         remaining_physics_steps -= 1;
     }

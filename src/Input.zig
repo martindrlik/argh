@@ -1,10 +1,14 @@
-const Input = @This();
 const std = @import("std");
 const Io = std.Io;
+const Duration = std.Io.Duration;
 
-stdin_buffer: [2000]u8 = undefined,
-is_jump_requested: bool = false,
+const Engine = @import("Engine.zig");
+const physics_step = Engine.physics_step;
+
+const Input = @This();
 is_land_requested: bool = false,
+remaining_jump_buffer: Duration = .zero,
+stdin_buffer: [2000]u8 = undefined,
 
 pub fn takeLine(self: *Input, io: Io) ?[]u8 {
     var stdin_reader = std.Io.File.stdin().reader(io, &self.stdin_buffer);
@@ -28,8 +32,8 @@ pub fn isLand(line: []const u8) bool {
     return std.mem.eql(u8, line, "land");
 }
 
-pub fn consumeJumpRequest(self: *Input) bool {
-    return consumeFlag(&self.is_jump_requested);
+pub fn requestJump(self: *Input) void {
+    self.remaining_jump_buffer.nanoseconds = physics_step.nanoseconds * 5;
 }
 
 pub fn consumeLandRequest(self: *Input) bool {

@@ -1,10 +1,14 @@
+const std = @import("std");
+const Duration = std.Io.Duration;
+
 const debug = @import("debug.zig");
+const Engine = @import("Engine.zig");
+const physics_step = Engine.physics_step;
 const Input = @import("Input.zig");
 const Position = @import("Position.zig");
 const Vector = Position.Vector;
 
 const Player = @This();
-
 health: u32,
 is_airborne: bool,
 is_grounded: bool,
@@ -22,14 +26,18 @@ pub fn init() Player {
 }
 
 pub fn physicsStep(self: *Player, input: *Input) void {
-    if (input.consumeJumpRequest()) {
-        debug.printPlayerJumpRequestConsumed();
-        if (self.is_grounded) {
-            debug.printPlayerJumped();
-            self.is_airborne = true;
-            self.is_grounded = false;
-        }
+    if (input.remaining_jump_buffer.nanoseconds > 0 and self.is_grounded) {
+        debug.printPlayerJumped();
+        self.is_airborne = true;
+        self.is_grounded = false;
+        input.remaining_jump_buffer = .zero;
     }
+    input.remaining_jump_buffer = .{
+        .nanoseconds = @max(
+            0,
+            input.remaining_jump_buffer.nanoseconds - physics_step.nanoseconds,
+        ),
+    };
     if (input.consumeLandRequest()) {
         if (self.is_airborne) {
             debug.printPlayerLanded();
@@ -37,6 +45,30 @@ pub fn physicsStep(self: *Player, input: *Input) void {
             self.is_grounded = true;
         }
     }
+}
+
+test "physicsStep remaining jump buffer" {
+    var input = Input{};
+    var player = Player.init();
+
+    player.is_airborne = true;
+    player.is_grounded = false;
+
+    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == Duration.zero.nanoseconds);
+    input.requestJump();
+    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == 5 * physics_step.nanoseconds);
+
+    player.physicsStep(&input);
+    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == 4 * physics_step.nanoseconds);
+    try std.testing.expect(player.is_airborne);
+    try std.testing.expect(!player.is_grounded);
+
+    player.is_airborne = false;
+    player.is_grounded = true;
+    player.physicsStep(&input);
+    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == Duration.zero.nanoseconds);
+    try std.testing.expect(player.is_airborne);
+    try std.testing.expect(!player.is_grounded);
 }
 
 pub fn draw(self: *const Player, alpha: f64) void {

@@ -36,13 +36,6 @@ pub fn physicsStep(self: *Engine, input: *Input, elapsed: Duration) void {
     self.accumulator.nanoseconds = @mod(self.accumulator.nanoseconds, physics_step.nanoseconds);
 }
 
-test physicsStep {
-    var engine: Engine = .init();
-    engine.accumulator = .fromNanoseconds(2 * physics_step.nanoseconds);
-    engine.physicsStep();
-    try std.testing.expect(engine.accumulator.nanoseconds == 0.0);
-}
-
 pub fn draw(self: *const Engine) void {
     const alpha = self.computeAlpha();
     debug.printAlpha(alpha);

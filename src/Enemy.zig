@@ -2,7 +2,6 @@ const Engine = @import("Engine.zig");
 const physics_step_seconds = Engine.physics_step_seconds;
 const Position = @import("Position.zig");
 const Vector = Position.Vector;
-const debug = @import("debug.zig");
 
 const Enemy = @This();
 
@@ -26,5 +25,6 @@ pub fn physicsStep(self: *Enemy) void {
 }
 
 pub fn draw(self: *const Enemy, alpha: f64) void {
-    debug.printEnemy(self, alpha);
+    _ = self;
+    _ = alpha;
 }

@@ -1,6 +1,5 @@
 const std = @import("std");
 const Io = std.Io;
-const debug = @import("debug.zig");
 
 const Engine = @import("Engine.zig");
 const Scene = @import("Scene.zig").Scene;
@@ -16,7 +15,7 @@ pub fn main(init: std.process.Init) !void {
     while (true) {
         if (input.takeLine(io)) |line| {
             if (Input.isJump(line)) {
-                input.is_jump_requested = true;
+                input.requestJump();
             } else if (Input.isLand(line)) {
                 input.is_land_requested = true;
             } else if (Input.isQuit(line)) {
@@ -25,7 +24,6 @@ pub fn main(init: std.process.Init) !void {
         }
 
         const elapsed = simulation.elapsed();
-        debug.printElapsed(elapsed);
         engine.physicsStep(&input, elapsed);
         engine.draw();
     }

@@ -1,7 +1,6 @@
 const std = @import("std");
 const Duration = std.Io.Duration;
 
-const debug = @import("debug.zig");
 const Engine = @import("Engine.zig");
 const physics_step = Engine.physics_step;
 const Input = @import("Input.zig");
@@ -27,7 +26,6 @@ pub fn init() Player {
 
 pub fn physicsStep(self: *Player, input: *Input) void {
     if (input.remaining_jump_buffer.nanoseconds > 0 and self.is_grounded) {
-        debug.printPlayerJumped();
         self.is_airborne = true;
         self.is_grounded = false;
         input.remaining_jump_buffer = .zero;
@@ -40,7 +38,6 @@ pub fn physicsStep(self: *Player, input: *Input) void {
     };
     if (input.consumeLandRequest()) {
         if (self.is_airborne) {
-            debug.printPlayerLanded();
             self.is_airborne = false;
             self.is_grounded = true;
         }
@@ -72,5 +69,6 @@ test "physicsStep remaining jump buffer" {
 }
 
 pub fn draw(self: *const Player, alpha: f64) void {
-    debug.printPlayer(self, alpha);
+    _ = self;
+    _ = alpha;
 }

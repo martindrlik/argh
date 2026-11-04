@@ -1,4 +1,3 @@
-const debug = @import("debug.zig");
 const Enemy = @import("Enemy.zig");
 const Engine = @import("Engine.zig");
 const physics_step_seconds = Engine.physics_step_seconds;

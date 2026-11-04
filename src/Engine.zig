@@ -1,7 +1,6 @@
 const std = @import("std");
 const Duration = std.Io.Duration;
 
-const debug = @import("debug.zig");
 const Input = @import("Input.zig");
 const Scene = @import("Scene.zig").Scene;
 
@@ -22,11 +21,6 @@ pub fn init() Engine {
 pub fn physicsStep(self: *Engine, input: *Input, elapsed: Duration) void {
     self.accumulator.nanoseconds += elapsed.nanoseconds;
 
-    debug.printAccumulator(self.accumulator);
-
-    if (self.accumulator.nanoseconds < physics_step.nanoseconds) {
-        debug.printPhysicsStepOmitted();
-    }
     var remaining_physics_steps = max_physics_steps_per_frame;
     while (self.accumulator.nanoseconds >= physics_step.nanoseconds and remaining_physics_steps > 0) {
         self.scene.physicsStep(input);
@@ -38,7 +32,6 @@ pub fn physicsStep(self: *Engine, input: *Input, elapsed: Duration) void {
 
 pub fn draw(self: *const Engine) void {
     const alpha = self.computeAlpha();
-    debug.printAlpha(alpha);
     self.scene.draw(alpha);
 }
 

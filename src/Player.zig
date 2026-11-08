@@ -1,19 +1,23 @@
 const std = @import("std");
 const Duration = std.Io.Duration;
 
+const rl = @import("raylib");
+
 const core = @import("core.zig");
 const Position = core.Position;
 const Vector = core.Vector;
-const unsigned = core.unsigned;
+const ScreenVector = core.ScreenVector;
+const int = core.int;
 const float = core.float;
 const Engine = @import("Engine.zig");
 const physics_step = Engine.physics_step;
 
 const Player = @This();
-pub const jump_buffer: Duration = .{ .nanoseconds = physics_step.nanoseconds * 5 };
-pub const coyote_time: Duration = .{ .nanoseconds = physics_step.nanoseconds * 5 };
+pub const jump_buffer: Duration = .fromNanoseconds(physics_step.nanoseconds * 5);
+pub const coyote_time: Duration = .fromNanoseconds(physics_step.nanoseconds * 5);
+pub const size: ScreenVector = .small;
 
-health: unsigned,
+health: int,
 is_airborne: bool,
 is_grounded: bool,
 position: Position,
@@ -69,6 +73,6 @@ fn resolveJump(self: *Player) void {
 }
 
 pub fn draw(self: *const Player, alpha: float) void {
-    _ = self;
-    _ = alpha;
+    const rec = self.position.screenRectangle(size, alpha);
+    rl.drawRectangleRec(rec, .blue);
 }

@@ -1,3 +1,5 @@
+const rl = @import("raylib");
+
 const core = @import("core.zig");
 const Position = core.Position;
 const Vector = core.Vector;
@@ -15,7 +17,7 @@ pub const default: Enemy = .{
     .health = 100.0,
     .name = "friendly",
     .position = .zero,
-    .velocity = .new(12, 7),
+    .velocity = .zero,
 };
 
 pub fn physicsStep(self: *Enemy) void {
@@ -24,6 +26,6 @@ pub fn physicsStep(self: *Enemy) void {
 }
 
 pub fn draw(self: *const Enemy, alpha: f64) void {
-    _ = self;
-    _ = alpha;
+    const rec = self.position.screenRectangle(.{ .u = 64, .v = 64 }, alpha);
+    rl.drawRectangleRec(rec, .red);
 }

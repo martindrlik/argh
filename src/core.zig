@@ -1,6 +1,7 @@
-pub const float = f64;
-pub const unsigned = u64;
+const rl = @import("raylib");
 
+pub const float = f64;
+pub const int = i64;
 pub const Vector = struct {
     u: float,
     v: float,
@@ -19,9 +20,15 @@ pub const Vector = struct {
     }
 };
 
-pub const DrawPoint = struct {
-    u: unsigned,
-    v: unsigned,
+pub const ScreenVector = struct {
+    u: int,
+    v: int,
+
+    pub const small: ScreenVector = .new(64, 64);
+
+    pub fn new(u: int, v: int) ScreenVector {
+        return .{ .u = u, .v = v };
+    }
 };
 
 pub const Position = struct {
@@ -30,10 +37,28 @@ pub const Position = struct {
 
     pub const zero: Position = .{ .current = .zero, .previous = .zero };
 
-    pub fn drawPoint(self: *const Position, alpha: float) DrawPoint {
+    pub fn new(position: Vector) Position {
+        return .{ .previous = position, .current = position };
+    }
+
+    pub fn screenPosition(self: *const Position, alpha: float) ScreenVector {
         return .{
             .u = @intFromFloat(@round(self.previous.u + (self.current.u - self.previous.u) * alpha)),
             .v = @intFromFloat(@round(self.previous.v + (self.current.v - self.previous.v) * alpha)),
+        };
+    }
+
+    pub fn screenRectangle(
+        self: *const Position,
+        size: ScreenVector,
+        alpha: f64,
+    ) rl.Rectangle {
+        const pt = self.screenPosition(alpha);
+        return .{
+            .x = @floatFromInt(pt.u),
+            .y = @floatFromInt(pt.v),
+            .width = @floatFromInt(size.u),
+            .height = @floatFromInt(size.v),
         };
     }
 };

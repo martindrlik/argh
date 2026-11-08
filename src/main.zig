@@ -14,7 +14,7 @@ pub fn main(init: std.process.Init) !void {
     _ = init.io;
     var engine: Engine = .init();
 
-    rl.initWindow(1024, 768, "argh");
+    rl.initWindow(Engine.size.u, Engine.size.v, "argh");
     defer rl.closeWindow();
 
     rl.setTargetFPS(120);

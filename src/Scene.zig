@@ -1,4 +1,9 @@
+const core = @import("core.zig");
+const Position = core.Position;
+const Enemy = @import("Enemy.zig");
+const Engine = @import("Engine.zig");
 const Entity = @import("Entity.zig").Entity;
+const Player = @import("Player.zig");
 
 pub const Scene = union(enum) {
     game: GameScene,
@@ -21,13 +26,17 @@ pub const Scene = union(enum) {
 };
 
 const GameScene = struct {
-    entities: [2]Entity,
+    entities: [3]Entity,
 
     pub fn init() GameScene {
+        var player = Player.default;
+        player.position = .new(.new(Engine.size.u - Player.size.u, 0));
+
         return .{
             .entities = .{
                 Entity{ .enemy = .default },
-                Entity{ .player = .default },
+                Entity{ .player = player },
+                Entity{ .platform = .bottomScreen() },
             },
         };
     }

@@ -1,33 +1,31 @@
 const std = @import("std");
 const Io = std.Io;
 
+const rl = @import("raylib");
+
+const core = @import("core.zig");
+const float = core.float;
+const Duration = Io.Duration;
 const Engine = @import("Engine.zig");
-const Input = @import("Input.zig");
 const Player = @import("Player.zig");
 const Scene = @import("Scene.zig").Scene;
-const Simulation = @import("Simulation.zig");
 
 pub fn main(init: std.process.Init) !void {
-    const io = init.io;
-    var input = Input{};
+    _ = init.io;
     var engine: Engine = .init();
-    var simulation: Simulation = .init(13);
 
-    while (true) {
-        if (input.takeLine(io)) |line| {
-            if (Input.isJump(line)) {
-                if (engine.query(Player)) |player| {
-                    std.debug.print("jump requested\n", .{});
-                    player.request(.Jump);
-                }
-            } else if (Input.isLand(line)) {
-                input.is_land_requested = true;
-            } else if (Input.isQuit(line)) {
-                break;
-            }
-        }
+    rl.initWindow(1024, 768, "argh");
+    defer rl.closeWindow();
 
-        const elapsed = simulation.elapsed();
+    rl.setTargetFPS(120);
+
+    while (!rl.windowShouldClose()) {
+        const elapsed_seconds: float = rl.getFrameTime();
+        const elapsed: Duration = .fromNanoseconds(@intFromFloat(elapsed_seconds * std.time.ns_per_s));
+
+        rl.beginDrawing();
+        defer rl.endDrawing();
+        rl.clearBackground(.black);
         engine.physicsStep(elapsed);
         engine.draw();
     }

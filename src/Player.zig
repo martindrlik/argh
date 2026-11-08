@@ -26,9 +26,9 @@ pub const default: Player = .{
     .is_airborne = false,
     .is_grounded = true,
     .position = .zero,
-    .remaining_coyote_time = coyote_time,
-    .remaining_jump_buffer = jump_buffer,
-    .velocity = .new(15, 10),
+    .remaining_coyote_time = .zero,
+    .remaining_jump_buffer = .zero,
+    .velocity = .zero,
 };
 
 pub const Action = enum {

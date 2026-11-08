@@ -7,7 +7,6 @@ const physics_step = Engine.physics_step;
 
 const Input = @This();
 is_land_requested: bool = false,
-remaining_jump_buffer: Duration = .zero,
 stdin_buffer: [2000]u8 = undefined,
 
 pub fn takeLine(self: *Input, io: Io) ?[]u8 {
@@ -30,10 +29,6 @@ pub fn isJump(line: []const u8) bool {
 
 pub fn isLand(line: []const u8) bool {
     return std.mem.eql(u8, line, "land");
-}
-
-pub fn requestJump(self: *Input) void {
-    self.remaining_jump_buffer.nanoseconds = physics_step.nanoseconds * 5;
 }
 
 pub fn consumeLandRequest(self: *Input) bool {

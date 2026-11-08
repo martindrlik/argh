@@ -1,74 +1,74 @@
 const std = @import("std");
 const Duration = std.Io.Duration;
 
+const core = @import("core.zig");
+const Position = core.Position;
+const Vector = core.Vector;
+const unsigned = core.unsigned;
+const float = core.float;
 const Engine = @import("Engine.zig");
 const physics_step = Engine.physics_step;
-const Input = @import("Input.zig");
-const Position = @import("Position.zig");
-const Vector = Position.Vector;
 
 const Player = @This();
-health: u32,
+pub const jump_buffer: Duration = .{ .nanoseconds = physics_step.nanoseconds * 5 };
+pub const coyote_time: Duration = .{ .nanoseconds = physics_step.nanoseconds * 5 };
+
+health: unsigned,
 is_airborne: bool,
 is_grounded: bool,
 position: Position,
+remaining_coyote_time: Duration,
+remaining_jump_buffer: Duration,
 velocity: Vector,
 
-pub fn init() Player {
-    return .{
-        .health = 100,
-        .is_airborne = false,
-        .is_grounded = true,
-        .position = .zero(),
-        .velocity = Vector{ .u = 15.0, .v = 10.0 },
-    };
+pub const default: Player = .{
+    .health = 100,
+    .is_airborne = false,
+    .is_grounded = true,
+    .position = .zero,
+    .remaining_coyote_time = coyote_time,
+    .remaining_jump_buffer = jump_buffer,
+    .velocity = .new(15, 10),
+};
+
+pub const Action = enum {
+    Jump,
+};
+
+pub fn request(self: *Player, action: Action) void {
+    switch (action) {
+        .Jump => self.remaining_jump_buffer = jump_buffer,
+    }
 }
 
-pub fn physicsStep(self: *Player, input: *Input) void {
-    if (input.remaining_jump_buffer.nanoseconds > 0 and self.is_grounded) {
+pub fn physicsStep(self: *Player) void {
+    self.resolveJump();
+    if (self.is_grounded) {
+        self.remaining_coyote_time = coyote_time;
+    } else {
+        self.remaining_coyote_time.nanoseconds = @max(
+            0,
+            self.remaining_coyote_time.nanoseconds - physics_step.nanoseconds,
+        );
+    }
+}
+
+fn resolveJump(self: *Player) void {
+    if (self.remaining_jump_buffer.nanoseconds > 0 and self.remaining_coyote_time.nanoseconds > 0) {
         self.is_airborne = true;
         self.is_grounded = false;
-        input.remaining_jump_buffer = .zero;
+        self.remaining_jump_buffer = .zero;
+        self.remaining_coyote_time = .zero;
     }
-    input.remaining_jump_buffer = .{
+    self.remaining_jump_buffer = .{
         .nanoseconds = @max(
             0,
-            input.remaining_jump_buffer.nanoseconds - physics_step.nanoseconds,
+            self.remaining_jump_buffer.nanoseconds - physics_step.nanoseconds,
         ),
     };
-    if (input.consumeLandRequest()) {
-        if (self.is_airborne) {
-            self.is_airborne = false;
-            self.is_grounded = true;
-        }
-    }
 }
 
-test "physicsStep remaining jump buffer" {
-    var input = Input{};
-    var player = Player.init();
-
-    player.is_airborne = true;
-    player.is_grounded = false;
-
-    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == Duration.zero.nanoseconds);
-    input.requestJump();
-    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == 5 * physics_step.nanoseconds);
-
-    player.physicsStep(&input);
-    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == 4 * physics_step.nanoseconds);
-    try std.testing.expect(player.is_airborne);
-    try std.testing.expect(!player.is_grounded);
-
-    player.is_airborne = false;
-    player.is_grounded = true;
-    player.physicsStep(&input);
-    try std.testing.expect(input.remaining_jump_buffer.nanoseconds == Duration.zero.nanoseconds);
-    try std.testing.expect(player.is_airborne);
-    try std.testing.expect(!player.is_grounded);
-}
-
-pub fn draw(self: *const Player, alpha: f64) void {
+pub fn draw(self: *const Player, alpha: float) void {
     _ = self;
     _ = alpha;
 }

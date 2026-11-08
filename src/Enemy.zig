@@ -1,7 +1,8 @@
+const core = @import("core.zig");
+const Position = core.Position;
+const Vector = core.Vector;
 const Engine = @import("Engine.zig");
 const physics_step_seconds = Engine.physics_step_seconds;
-const Position = @import("Position.zig");
-const Vector = Position.Vector;
 
 const Enemy = @This();
 
@@ -10,14 +11,12 @@ name: []const u8,
 position: Position,
 velocity: Vector,
 
-pub fn init() Enemy {
-    return .{
-        .health = 100.0,
-        .name = "friendly",
-        .position = .zero(),
-        .velocity = Vector{ .u = 12.0, .v = 7.0 },
-    };
-}
+pub const default: Enemy = .{
+    .health = 100.0,
+    .name = "friendly",
+    .position = .zero,
+    .velocity = .new(12, 7),
+};
 
 pub fn physicsStep(self: *Enemy) void {
     self.position.previous = self.position.current;

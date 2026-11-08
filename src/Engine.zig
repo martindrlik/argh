@@ -1,7 +1,7 @@
 const std = @import("std");
 const Duration = std.Io.Duration;
 
-const Input = @import("Input.zig");
+const Player = @import("Player.zig");
 const Scene = @import("Scene.zig").Scene;
 
 const Engine = @This();
@@ -18,12 +18,25 @@ pub fn init() Engine {
     };
 }
 
-pub fn physicsStep(self: *Engine, input: *Input, elapsed: Duration) void {
+pub fn query(self: *Engine, comptime T: type) ?*T {
+    for (&self.scene.game.entities) |*entity| {
+        switch (entity.*) {
+            inline else => |*payload| {
+                if (@TypeOf(payload) == *T) {
+                    return payload;
+                }
+            },
+        }
+    }
+    return null;
+}
+
+pub fn physicsStep(self: *Engine, elapsed: Duration) void {
     self.accumulator.nanoseconds += elapsed.nanoseconds;
 
     var remaining_physics_steps = max_physics_steps_per_frame;
     while (self.accumulator.nanoseconds >= physics_step.nanoseconds and remaining_physics_steps > 0) {
-        self.scene.physicsStep(input);
+        self.scene.physicsStep();
         self.accumulator.nanoseconds -= physics_step.nanoseconds;
         remaining_physics_steps -= 1;
     }

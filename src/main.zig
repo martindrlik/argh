@@ -1,31 +1,27 @@
 const std = @import("std");
 const Io = std.Io;
-
-const rl = @import("raylib");
-
-const core = @import("core.zig");
-const float = core.float;
 const Duration = Io.Duration;
-const Engine = @import("Engine.zig");
-const Player = @import("Player.zig");
-const Scene = @import("Scene.zig").Scene;
+
+const core = @import("core");
+const Engine = core.Engine;
+const float = core.float;
 
 pub fn main(init: std.process.Init) !void {
     _ = init.io;
     var engine: Engine = .init();
 
-    rl.initWindow(Engine.size.u, Engine.size.v, "argh");
-    defer rl.closeWindow();
+    core.initWindow(Engine.size.u, Engine.size.v, "argh");
+    defer core.closeWindow();
 
-    rl.setTargetFPS(120);
+    core.setTargetFPS(120);
 
-    while (!rl.windowShouldClose()) {
-        const elapsed_seconds: float = rl.getFrameTime();
+    while (!core.windowShouldClose()) {
+        const elapsed_seconds: float = core.frameTime();
         const elapsed: Duration = .fromNanoseconds(@intFromFloat(elapsed_seconds * std.time.ns_per_s));
 
-        rl.beginDrawing();
-        defer rl.endDrawing();
-        rl.clearBackground(.black);
+        core.beginDrawing();
+        defer core.endDrawing();
+        core.clearBackground(.black);
         engine.physicsStep(elapsed);
         engine.draw();
     }

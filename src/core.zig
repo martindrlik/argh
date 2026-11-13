@@ -1,7 +1,22 @@
 const rl = @import("raylib");
+pub const beginDrawing = rl.beginDrawing;
+pub const clearBackground = rl.clearBackground;
+pub const closeWindow = rl.closeWindow;
+pub const endDrawing = rl.endDrawing;
+pub const frameTime = rl.getFrameTime;
+pub const initWindow = rl.initWindow;
+pub const setTargetFPS = rl.setTargetFPS;
+pub const windowShouldClose = rl.windowShouldClose;
+
+pub const Enemy = @import("Enemy.zig");
+pub const Engine = @import("Engine.zig");
+pub const Entity = @import("Entity.zig").Entity;
+pub const Platfrom = @import("Platform.zig");
+pub const Player = @import("Player.zig");
 
 pub const float = f64;
 pub const int = i64;
+
 pub const Vector = struct {
     u: float,
     v: float,

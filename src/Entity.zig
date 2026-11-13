@@ -1,4 +1,5 @@
 const core = @import("core.zig");
+const float = core.float;
 const Enemy = @import("Enemy.zig");
 const Engine = @import("Engine.zig");
 const physics_step_seconds = Engine.physics_step_seconds;
@@ -10,10 +11,10 @@ pub const Entity = union(enum) {
     player: Player,
     platform: Platform,
 
-    pub fn physicsStep(self: *Entity) void {
+    pub fn physicsStep(self: *Entity, gravity: float) void {
         switch (self.*) {
             .enemy => |*enemy| enemy.physicsStep(),
-            .player => |*player| player.physicsStep(),
+            .player => |*player| player.physicsStep(gravity),
             .platform => |*platform| platform.physicsStep(),
         }
     }

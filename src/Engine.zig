@@ -3,8 +3,8 @@ const Duration = std.Io.Duration;
 
 const core = @import("core.zig");
 const ScreenVector = core.ScreenVector;
-const Player = @import("Player.zig");
-const Scene = @import("Scene.zig").Scene;
+const scene = @import("scene.zig");
+const Scene = scene.Scene;
 
 const Engine = @This();
 const max_physics_steps_per_frame: u32 = 5;
@@ -13,21 +13,19 @@ pub const physics_step_seconds = @as(f64, @floatFromInt(physics_step.nanoseconds
 pub const size: ScreenVector = .new(1024, 768);
 
 accumulator: Duration = .zero,
-scene: Scene,
+scenes: [1]Scene,
 
 pub fn init() Engine {
     return .{
-        .scene = .{ .game = .init() },
+        .scenes = @splat(Scene{ .game = .init() }),
     };
 }
 
-pub fn query(self: *Engine, comptime T: type) ?*T {
-    for (&self.scene.game.entities) |*entity| {
-        switch (entity.*) {
-            inline else => |*payload| {
-                if (@TypeOf(payload) == *T) {
-                    return payload;
-                }
+pub fn queryActive(self: *Engine, comptime T: type) ?*T {
+    for (&self.scenes) |scn| {
+        switch (&scn) {
+            .game => |*game| {
+                return game.queryMutEntity(T);
             },
         }
     }
@@ -39,7 +37,7 @@ pub fn physicsStep(self: *Engine, elapsed: Duration) void {
 
     var remaining_physics_steps = max_physics_steps_per_frame;
     while (self.accumulator.nanoseconds >= physics_step.nanoseconds and remaining_physics_steps > 0) {
-        self.scene.physicsStep();
+        for (&self.scenes) |*scn| scn.physicsStep();
         self.accumulator.nanoseconds -= physics_step.nanoseconds;
         remaining_physics_steps -= 1;
     }
@@ -48,7 +46,7 @@ pub fn physicsStep(self: *Engine, elapsed: Duration) void {
 
 pub fn draw(self: *const Engine) void {
     const alpha = self.computeAlpha();
-    self.scene.draw(alpha);
+    for (self.scenes) |scn| scn.draw(alpha);
 }
 
 fn computeAlpha(self: *const Engine) f64 {

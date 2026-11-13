@@ -4,7 +4,7 @@ const core = @import("core.zig");
 const ScreenVector = core.ScreenVector;
 const Position = core.Position;
 const float = core.float;
-const Engine = @import("Engine.zig");
+const Engine = core.Engine;
 
 const Platfrom = @This();
 

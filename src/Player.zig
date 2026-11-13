@@ -9,8 +9,9 @@ const Vector = core.Vector;
 const ScreenVector = core.ScreenVector;
 const int = core.int;
 const float = core.float;
-const Engine = @import("Engine.zig");
+const Engine = core.Engine;
 const physics_step = Engine.physics_step;
+const physics_step_seconds = Engine.physics_step_seconds;
 
 const Player = @This();
 pub const jump_buffer: Duration = .fromNanoseconds(physics_step.nanoseconds * 5);
@@ -27,8 +28,8 @@ velocity: Vector,
 
 pub const default: Player = .{
     .health = 100,
-    .is_airborne = false,
-    .is_grounded = true,
+    .is_airborne = true,
+    .is_grounded = false,
     .position = .zero,
     .remaining_coyote_time = .zero,
     .remaining_jump_buffer = .zero,
@@ -45,7 +46,12 @@ pub fn request(self: *Player, action: Action) void {
     }
 }
 
-pub fn physicsStep(self: *Player) void {
+pub fn physicsStep(self: *Player, gravity: float) void {
+    self.position.previous = self.position.current;
+    if (self.is_airborne) {
+        self.velocity.v += gravity * physics_step_seconds;
+        self.position.current.v += self.velocity.v * physics_step_seconds;
+    }
     self.resolveJump();
     if (self.is_grounded) {
         self.remaining_coyote_time = coyote_time;

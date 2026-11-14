@@ -38,6 +38,12 @@ pub fn loadGameScene(io: Io, file_path: []const u8, scene: *GameScene) !void {
                         .size = .tile,
                     },
                 },
+                '|' => scene.entities[entity_id] = .{
+                    .platform = Platform{
+                        .position = position,
+                        .size = .tile,
+                    },
+                },
                 else => {
                     scene.entities[entity_id] = .{ .empty = .{} };
                 },

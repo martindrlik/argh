@@ -19,6 +19,13 @@ pub const Vector = struct {
         return .{ .u = u, .v = v };
     }
 
+    pub fn fromScreenVector(vector: screen.Vector) Vector {
+        return .{
+            .u = @floatFromInt(vector.u),
+            .v = @floatFromInt(vector.v),
+        };
+    }
+
     pub fn addScaled(self: Vector, other: Vector, scale: float) Vector {
         return .{
             .u = self.u + other.u * scale,

@@ -34,15 +34,15 @@ pub fn main(init: std.process.Init) !void {
 }
 
 fn processPlayerInput(player: *Player) void {
-    player.horizontal_input = 0;
-    if (rl.isKeyDown(.a)) player.horizontal_input -= 1;
-    if (rl.isKeyDown(.d)) player.horizontal_input += 1;
+    player.input.horizontal_input = 0;
+    if (rl.isKeyDown(.a)) player.input.horizontal_input -= 1;
+    if (rl.isKeyDown(.d)) player.input.horizontal_input += 1;
 
-    player.is_jump_held = rl.isKeyDown(.space);
+    player.input.is_jump_held = rl.isKeyDown(.space);
     if (rl.isKeyPressed(.space)) {
-        player.request(.Jump);
+        player.requestJump();
     }
     if (rl.isKeyReleased(.space)) {
-        player.is_jump_released = true;
+        player.input.is_jump_released = true;
     }
 }

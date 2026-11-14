@@ -16,49 +16,79 @@ const screen = core.screen;
 
 const Player = @This();
 
-pub const bounds = struct {
-    acceleration: float = 600,
-    coyote_time: Duration = .fromNanoseconds(physics_step.nanoseconds * 5),
-    deceleration: float = 1000,
-    fall_speed: float = 600,
-    jump_buffer: Duration = .fromNanoseconds(physics_step.nanoseconds * 5),
-    move_speed: float = 200,
-    size: screen.Vector = .tile,
-}{};
+const Properties = struct {
+    acceleration: float,
+    coyote_time: Duration,
+    deceleration: float,
+    gravity_fall: float,
+    jump_buffer: Duration,
+    jump_height: float,
+    jump_time_to_peak: float,
+    max_fall_speed: float,
+    move_speed: float,
+    size: screen.Vector,
 
-gravity_fall: float,
-gravity_rise: float,
-horizontal_input: float = 0,
+    pub const default = Properties{
+        .acceleration = 600,
+        .coyote_time = .fromNanoseconds(physics_step.nanoseconds * 5),
+        .deceleration = 1000,
+        .gravity_fall = 1200,
+        .jump_buffer = .fromNanoseconds(physics_step.nanoseconds * 5),
+        .jump_height = 3 * screen.Vector.tile.u,
+        .jump_time_to_peak = 0.4,
+        .max_fall_speed = 600,
+        .move_speed = 200,
+        .size = .tile,
+    };
+
+    pub fn gravity(self: *const Properties, vertical_velocity: float) float {
+        const gravity_rise: float = 2 * self.jump_height / (self.jump_time_to_peak * self.jump_time_to_peak);
+        return if (vertical_velocity < 0) gravity_rise else self.gravity_fall;
+    }
+
+    pub fn jumpVelocity(self: *const Properties) float {
+        return -2 * self.jump_height / self.jump_time_to_peak;
+    }
+
+    pub fn floatSize(self: *const Properties) Vector {
+        return .fromScreenVector(self.size);
+    }
+};
+
+const Input = struct {
+    horizontal_input: float,
+    is_jump_held: bool,
+    is_jump_released: bool,
+    remaining_coyote_time: Duration,
+    remaining_jump_buffer: Duration,
+
+    pub const none = Input{
+        .horizontal_input = 0,
+        .is_jump_held = false,
+        .is_jump_released = false,
+        .remaining_coyote_time = .zero,
+        .remaining_jump_buffer = .zero,
+    };
+};
+
+input: Input,
 is_grounded: bool,
-is_jump_held: bool = false,
-is_jump_released: bool = false,
-jump_vertical_velocity: float,
 position: Position,
-remaining_coyote_time: Duration,
-remaining_jump_buffer: Duration,
+properties: Properties,
 velocity: Vector,
 
 pub fn new(position: Position, is_grounded: bool) Player {
     return .{
-        .gravity_fall = 1200,
-        .gravity_rise = 500,
+        .input = .none,
         .is_grounded = is_grounded,
-        .jump_vertical_velocity = -400,
         .position = position,
-        .remaining_coyote_time = .zero,
-        .remaining_jump_buffer = .zero,
+        .properties = .default,
         .velocity = .zero,
     };
 }
 
-pub const Action = enum {
-    Jump,
-};
-
-pub fn request(self: *Player, action: Action) void {
-    switch (action) {
-        .Jump => self.remaining_jump_buffer = bounds.jump_buffer,
-    }
+pub fn requestJump(self: *Player) void {
+    self.input.remaining_jump_buffer = self.properties.jump_buffer;
 }
 
 pub fn entity(self: *Player) *Entity {
@@ -81,39 +111,39 @@ pub fn physicsStep(self: *Player, scene: *Scene) void {
 fn processJump(self: *Player) void {
     const can_jump =
         self.is_grounded or
-        self.remaining_coyote_time.nanoseconds > 0;
+        self.input.remaining_coyote_time.nanoseconds > 0;
     const started_jump =
-        self.remaining_jump_buffer.nanoseconds > 0 and
+        self.input.remaining_jump_buffer.nanoseconds > 0 and
         can_jump;
 
     if (started_jump) {
-        self.velocity.v = self.jump_vertical_velocity;
+        self.velocity.v = self.properties.jumpVelocity();
         self.is_grounded = false;
-        self.remaining_jump_buffer = .zero;
-        self.remaining_coyote_time = .zero;
+        self.input.remaining_jump_buffer = .zero;
+        self.input.remaining_coyote_time = .zero;
     }
 
     const should_cut_jump =
-        self.is_jump_released or
-        (started_jump and !self.is_jump_held);
+        self.input.is_jump_released or
+        (started_jump and !self.input.is_jump_held);
 
     if (should_cut_jump and self.velocity.v < 0) {
         self.velocity.v *= 0.5;
     }
 
-    self.is_jump_released = false;
+    self.input.is_jump_released = false;
 
-    self.remaining_jump_buffer = .{
+    self.input.remaining_jump_buffer = .{
         .nanoseconds = @max(
             0,
-            self.remaining_jump_buffer.nanoseconds - physics_step.nanoseconds,
+            self.input.remaining_jump_buffer.nanoseconds - physics_step.nanoseconds,
         ),
     };
 }
 
 fn processHorizontalMovement(self: *Player) void {
-    const target_velocity = self.horizontal_input * bounds.move_speed;
-    const rate = if (self.horizontal_input == 0) bounds.deceleration else bounds.acceleration;
+    const target_velocity = self.input.horizontal_input * self.properties.move_speed;
+    const rate = if (self.input.horizontal_input == 0) self.properties.deceleration else self.properties.acceleration;
     const maximum_change = rate * physics_step_seconds;
     if (self.velocity.u < target_velocity) {
         self.velocity.u = @min(
@@ -130,18 +160,18 @@ fn processHorizontalMovement(self: *Player) void {
 }
 
 fn processGravity(self: *Player) void {
-    self.velocity.v += self.gravity() * physics_step_seconds;
-    self.velocity.v = @min(self.velocity.v, bounds.fall_speed);
+    self.velocity.v += self.properties.gravity(self.velocity.v) * physics_step_seconds;
+    self.velocity.v = @min(self.velocity.v, self.properties.max_fall_speed);
     self.position.current.v += self.velocity.v * physics_step_seconds;
 }
 
 fn processCoyoteTime(self: *Player) void {
     if (self.is_grounded) {
-        self.remaining_coyote_time = bounds.coyote_time;
+        self.input.remaining_coyote_time = self.properties.coyote_time;
     } else {
-        self.remaining_coyote_time.nanoseconds = @max(
+        self.input.remaining_coyote_time.nanoseconds = @max(
             0,
-            self.remaining_coyote_time.nanoseconds - physics_step.nanoseconds,
+            self.input.remaining_coyote_time.nanoseconds - physics_step.nanoseconds,
         );
     }
 }
@@ -151,7 +181,7 @@ fn processHCollision(self: *Player, scene: *Scene) void {
         if (scene.checkHCollision(self.entity())) |hc| switch (hc) {
             .left_wall => |u| {
                 self.velocity.u = 0;
-                self.position.current.u = u - bounds.size.u;
+                self.position.current.u = u - self.properties.floatSize().u;
             },
             .right_wall => |u| {
                 self.velocity.u = 0;
@@ -173,17 +203,13 @@ fn processVCollision(self: *Player, scene: *Scene) void {
             .ground => |v| {
                 self.is_grounded = true;
                 self.velocity.v = 0;
-                self.position.current.v = v - bounds.size.v;
+                self.position.current.v = v - self.properties.floatSize().v;
             },
         };
     }
 }
 
-fn gravity(self: *const Player) float {
-    return if (self.velocity.v < 0) self.gravity_rise else self.gravity_fall;
-}
-
 pub fn draw(self: *const Player, alpha: float) void {
-    const rec = self.position.screenRectangle(bounds.size, alpha);
+    const rec = self.position.screenRectangle(self.properties.size, alpha);
     rl.drawRectangleRec(rec, .blue);
 }

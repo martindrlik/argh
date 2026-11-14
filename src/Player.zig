@@ -168,9 +168,17 @@ fn processHorizontalMovement(self: *Player) void {
 }
 
 fn processGravity(self: *Player) void {
-    self.velocity.v += self.properties.gravity(self.velocity.v) * physics_step_seconds;
-    self.velocity.v = @min(self.velocity.v, self.properties.max_fall_speed);
-    self.position.current.v += self.velocity.v * physics_step_seconds;
+    const velocity_before = self.velocity.v;
+    const gravity = self.properties.gravity(velocity_before);
+
+    self.velocity.v += gravity * physics_step_seconds;
+    self.velocity.v = @min(
+        self.velocity.v,
+        self.properties.max_fall_speed,
+    );
+
+    const average_velocity = (velocity_before + self.velocity.v) * 0.5;
+    self.position.current.v += average_velocity * physics_step_seconds;
 }
 
 fn processHCollision(self: *Player, scene: *Scene) void {

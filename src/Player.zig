@@ -30,6 +30,7 @@ gravity_fall: float,
 gravity_rise: float,
 horizontal_input: float = 0,
 is_grounded: bool,
+is_jump_held: bool = false,
 is_jump_released: bool = false,
 jump_vertical_velocity: float,
 position: Position,
@@ -66,27 +67,42 @@ pub fn entity(self: *Player) *Entity {
 
 pub fn physicsStep(self: *Player, scene: *Scene) void {
     self.position.previous = self.position.current;
+
     self.processJump();
-    self.processHorizontalMovement();
-    self.processGravity();
     self.processCoyoteTime();
-    self.processCollision(scene);
+
+    self.processHorizontalMovement();
+    self.processHCollision(scene);
+
+    self.processGravity();
+    self.processVCollision(scene);
 }
 
 fn processJump(self: *Player) void {
-    const can_jump = self.is_grounded or self.remaining_coyote_time.nanoseconds > 0;
-    if (self.remaining_jump_buffer.nanoseconds > 0 and can_jump) {
+    const can_jump =
+        self.is_grounded or
+        self.remaining_coyote_time.nanoseconds > 0;
+    const started_jump =
+        self.remaining_jump_buffer.nanoseconds > 0 and
+        can_jump;
+
+    if (started_jump) {
         self.velocity.v = self.jump_vertical_velocity;
         self.is_grounded = false;
         self.remaining_jump_buffer = .zero;
         self.remaining_coyote_time = .zero;
     }
-    if (self.is_jump_released) {
-        if (self.velocity.v < 0) {
-            self.velocity.v *= 0.5;
-        }
-        self.is_jump_released = false;
+
+    const should_cut_jump =
+        self.is_jump_released or
+        (started_jump and !self.is_jump_held);
+
+    if (should_cut_jump and self.velocity.v < 0) {
+        self.velocity.v *= 0.5;
     }
+
+    self.is_jump_released = false;
+
     self.remaining_jump_buffer = .{
         .nanoseconds = @max(
             0,
@@ -130,12 +146,24 @@ fn processCoyoteTime(self: *Player) void {
     }
 }
 
-fn processCollision(self: *Player, scene: *Scene) void {
+fn processHCollision(self: *Player, scene: *Scene) void {
+    if (self.position.current.u != self.position.previous.u) {
+        if (scene.checkHCollision(self.entity())) |hc| switch (hc) {
+            .left_wall => |u| {
+                self.velocity.u = 0;
+                self.position.current.u = u - bounds.size.u;
+            },
+            .right_wall => |u| {
+                self.velocity.u = 0;
+                self.position.current.u = u;
+            },
+        };
+    }
+}
+
+fn processVCollision(self: *Player, scene: *Scene) void {
     self.is_grounded = false;
 
-    if (self.position.current.u != self.position.previous.u) {
-        // TODO check horizontal collisions
-    }
     if (self.position.current.v != self.position.previous.v) {
         if (scene.checkVCollision(self.entity())) |vc| switch (vc) {
             .ceiling => |v| {

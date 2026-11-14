@@ -13,6 +13,7 @@ pub const Engine = @import("Engine.zig");
 pub const Entity = @import("Entity.zig").Entity;
 pub const Platfrom = @import("Platform.zig");
 pub const Player = @import("Player.zig");
+pub const Scene = @import("scene.zig").Scene;
 
 pub const float = f64;
 pub const int = i64;
@@ -76,4 +77,9 @@ pub const Position = struct {
             .height = @floatFromInt(size.v),
         };
     }
+};
+
+pub const VCollision = union(enum) {
+    ceiling: float,
+    ground: float,
 };

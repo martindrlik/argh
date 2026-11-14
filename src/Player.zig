@@ -5,6 +5,7 @@ const rl = @import("raylib");
 
 const core = @import("core.zig");
 const Position = core.Position;
+const Scene = core.Scene;
 const Vector = core.Vector;
 const ScreenVector = core.ScreenVector;
 const int = core.int;
@@ -12,6 +13,7 @@ const float = core.float;
 const Engine = core.Engine;
 const physics_step = Engine.physics_step;
 const physics_step_seconds = Engine.physics_step_seconds;
+const Entity = core.Entity;
 
 const Player = @This();
 pub const jump_buffer: Duration = .fromNanoseconds(physics_step.nanoseconds * 5);
@@ -46,10 +48,10 @@ pub fn request(self: *Player, action: Action) void {
     }
 }
 
-pub fn physicsStep(self: *Player, gravity: float) void {
+pub fn physicsStep(self: *Player, scene: *Scene) void {
     self.position.previous = self.position.current;
     if (self.is_airborne) {
-        self.velocity.v += gravity * physics_step_seconds;
+        self.velocity.v += scene.gravity() * physics_step_seconds;
         self.position.current.v += self.velocity.v * physics_step_seconds;
     }
     self.resolveJump();
@@ -60,6 +62,20 @@ pub fn physicsStep(self: *Player, gravity: float) void {
             0,
             self.remaining_coyote_time.nanoseconds - physics_step.nanoseconds,
         );
+    }
+    if (self.position.current.u != self.position.previous.u) {
+        // TODO check horizontal collisions
+    }
+    if (self.position.current.v != self.position.previous.v) {
+        const entity: *Entity = @fieldParentPtr("player", self);
+        if (scene.checkVCollision(entity)) |vc| switch (vc) {
+            .ceiling => {},
+            .ground => |v| {
+                self.is_grounded = true;
+                self.velocity.v = 0;
+                self.position.current.v = v - size.v;
+            },
+        };
     }
 }
 

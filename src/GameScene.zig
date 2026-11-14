@@ -5,6 +5,7 @@ const Enemy = core.Enemy;
 const Engine = core.Engine;
 const Entity = core.Entity;
 const Player = core.Player;
+const Scene = core.Scene;
 
 const GameScene = @This();
 
@@ -21,7 +22,7 @@ pub fn init() GameScene {
             Entity{ .player = player },
             Entity{ .platform = .bottomScreen() },
         },
-        .gravity = 10,
+        .gravity = 500,
     };
 }
 
@@ -38,9 +39,9 @@ pub fn queryMutEntity(self: *GameScene, comptime T: type) ?*T {
     return null;
 }
 
-pub fn physicsStep(self: *GameScene) void {
+pub fn physicsStep(self: *GameScene, scene: *Scene) void {
     for (&self.entities) |*entity| {
-        entity.physicsStep(self.gravity);
+        entity.physicsStep(scene);
     }
 }
 

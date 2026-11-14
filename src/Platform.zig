@@ -1,7 +1,7 @@
 const rl = @import("raylib");
 
 const core = @import("core.zig");
-const ScreenVector = core.ScreenVector;
+const screen = core.screen;
 const Position = core.Position;
 const float = core.float;
 const Engine = core.Engine;
@@ -9,12 +9,12 @@ const Engine = core.Engine;
 const Platfrom = @This();
 
 position: Position,
-size: ScreenVector,
+size: screen.Vector,
 
 pub fn bottomScreen() Platfrom {
     return .{
-        .position = .new(.new(0, Engine.size.v - ScreenVector.small.v)),
-        .size = .new(Engine.size.u, ScreenVector.small.v),
+        .position = .new(.new(0, screen.Vector.screen.v - screen.Vector.small.v)),
+        .size = .new(screen.Vector.screen.u, screen.Vector.small.v),
     };
 }
 

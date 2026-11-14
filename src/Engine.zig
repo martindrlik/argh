@@ -1,4 +1,5 @@
 const std = @import("std");
+const Io = std.Io;
 const Duration = std.Io.Duration;
 
 const core = @import("core.zig");
@@ -10,22 +11,25 @@ const Engine = @This();
 const max_physics_steps_per_frame: u32 = 5;
 pub const physics_step: std.Io.Duration = .fromNanoseconds((std.time.ns_per_s + 30) / 60);
 pub const physics_step_seconds = @as(f64, @floatFromInt(physics_step.nanoseconds)) / std.time.ns_per_s;
-pub const size: ScreenVector = .new(1024, 768);
 
 accumulator: Duration = .zero,
 scenes: [1]Scene,
 
-pub fn init() Engine {
+pub fn init(io: Io) !Engine {
     return .{
-        .scenes = @splat(Scene{ .game = .init() }),
+        .scenes = @splat(Scene{
+            .game = try .load(io, "assets/maps/level_1.txt"),
+        }),
     };
 }
 
-pub fn queryActive(self: *Engine, comptime T: type) ?*T {
-    for (&self.scenes) |scn| {
-        switch (&scn) {
+pub fn queryMut(self: *Engine, comptime T: type) ?*T {
+    for (&self.scenes) |*scn| {
+        switch (scn.*) {
             .game => |*game| {
-                return game.queryMutEntity(T);
+                if (game.queryMut(T)) |player| {
+                    return player;
+                }
             },
         }
     }

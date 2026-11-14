@@ -1,32 +1,31 @@
+const std = @import("std");
+const Io = std.Io;
+
 const core = @import("core.zig");
 const Position = core.Position;
 const float = core.float;
-const Enemy = core.Enemy;
 const Engine = core.Engine;
 const Entity = core.Entity;
 const Player = core.Player;
 const Scene = core.Scene;
+const screen = core.screen;
+const loader = @import("loader.zig");
 
 const GameScene = @This();
 
-entities: [3]Entity,
+entities: [screen.Vector.tiles.u * screen.Vector.tiles.v]Entity,
 gravity: float,
 
-pub fn init() GameScene {
-    var player = Player.default;
-    player.position = .new(.new(Engine.size.u - Player.size.u, 0));
-
-    return .{
-        .entities = .{
-            Entity{ .enemy = .default },
-            Entity{ .player = player },
-            Entity{ .platform = .bottomScreen() },
-        },
+pub fn load(io: Io, file_path: []const u8) !GameScene {
+    var game_scene = GameScene{
+        .entities = undefined,
         .gravity = 500,
     };
+    try loader.loadGameScene(io, file_path, &game_scene);
+    return game_scene;
 }
 
-pub fn queryMutEntity(self: *GameScene, comptime T: type) ?*T {
+pub fn queryMut(self: *GameScene, comptime T: type) ?*T {
     for (&self.entities) |*entity| {
         switch (entity.*) {
             inline else => |*payload| {

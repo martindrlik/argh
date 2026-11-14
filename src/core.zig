@@ -5,18 +5,19 @@ pub const closeWindow = rl.closeWindow;
 pub const endDrawing = rl.endDrawing;
 pub const frameTime = rl.getFrameTime;
 pub const initWindow = rl.initWindow;
+pub const isKeyPressed = rl.isKeyPressed;
 pub const setTargetFPS = rl.setTargetFPS;
 pub const windowShouldClose = rl.windowShouldClose;
 
-pub const Enemy = @import("Enemy.zig");
 pub const Engine = @import("Engine.zig");
 pub const Entity = @import("Entity.zig").Entity;
+pub const GameScene = @import("GameScene.zig");
 pub const Platfrom = @import("Platform.zig");
 pub const Player = @import("Player.zig");
 pub const Scene = @import("scene.zig").Scene;
+pub const screen = @import("screen.zig");
 
 pub const float = f64;
-pub const int = i64;
 
 pub const Vector = struct {
     u: float,
@@ -36,17 +37,6 @@ pub const Vector = struct {
     }
 };
 
-pub const ScreenVector = struct {
-    u: int,
-    v: int,
-
-    pub const small: ScreenVector = .new(64, 64);
-
-    pub fn new(u: int, v: int) ScreenVector {
-        return .{ .u = u, .v = v };
-    }
-};
-
 pub const Position = struct {
     previous: Vector,
     current: Vector,
@@ -57,7 +47,7 @@ pub const Position = struct {
         return .{ .previous = position, .current = position };
     }
 
-    pub fn screenPosition(self: *const Position, alpha: float) ScreenVector {
+    pub fn screenPosition(self: *const Position, alpha: float) screen.Vector {
         return .{
             .u = @intFromFloat(@round(self.previous.u + (self.current.u - self.previous.u) * alpha)),
             .v = @intFromFloat(@round(self.previous.v + (self.current.v - self.previous.v) * alpha)),
@@ -66,7 +56,7 @@ pub const Position = struct {
 
     pub fn screenRectangle(
         self: *const Position,
-        size: ScreenVector,
+        size: screen.Vector,
         alpha: f64,
     ) rl.Rectangle {
         const pt = self.screenPosition(alpha);
@@ -77,6 +67,11 @@ pub const Position = struct {
             .height = @floatFromInt(size.v),
         };
     }
+};
+
+pub const HCollision = union(enum) {
+    left_wall: float,
+    right_wall: float,
 };
 
 pub const VCollision = union(enum) {

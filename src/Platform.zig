@@ -14,7 +14,7 @@ size: screen.Vector,
 pub fn bottomScreen() Platfrom {
     return .{
         .position = .new(.new(0, screen.Vector.screen.v - screen.Vector.small.v)),
-        .size = .new(screen.Vector.screen.u, screen.Vector.small.v),
+        .size = .new(screen.Vector.screen.h, screen.Vector.small.v),
     };
 }
 

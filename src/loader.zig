@@ -9,7 +9,7 @@ const Position = core.Position;
 const screen = core.screen;
 
 pub fn loadGameScene(io: Io, file_path: []const u8, scene: *GameScene) !void {
-    var buffer: [screen.Vector.tiles.u * screen.Vector.tiles.v + screen.Vector.tiles.v]u8 = undefined;
+    var buffer: [screen.Vector.tiles.h * screen.Vector.tiles.v + screen.Vector.tiles.v]u8 = undefined;
     const map = try std.Io.Dir.cwd().readFile(io, file_path, &buffer);
     var lines = std.mem.splitScalar(u8, map, '\n');
 
@@ -19,7 +19,7 @@ pub fn loadGameScene(io: Io, file_path: []const u8, scene: *GameScene) !void {
     while (lines.next()) |line| {
         for (line) |tile| {
             const position = Position.new(.new(
-                current_u * screen.Vector.tile.u,
+                current_u * screen.Vector.tile.h,
                 current_v * screen.Vector.tile.v,
             ));
             switch (tile) {

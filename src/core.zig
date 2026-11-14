@@ -10,25 +10,25 @@ pub const screen = @import("screen.zig");
 pub const float = f64;
 
 pub const Vector = struct {
-    u: float,
+    h: float,
     v: float,
 
-    pub const zero: Vector = .{ .u = 0.0, .v = 0.0 };
+    pub const zero: Vector = .{ .h = 0.0, .v = 0.0 };
 
-    pub fn new(u: float, v: float) Vector {
-        return .{ .u = u, .v = v };
+    pub fn new(h: float, v: float) Vector {
+        return .{ .h = h, .v = v };
     }
 
     pub fn fromScreenVector(vector: screen.Vector) Vector {
         return .{
-            .u = @floatFromInt(vector.u),
+            .h = @floatFromInt(vector.h),
             .v = @floatFromInt(vector.v),
         };
     }
 
     pub fn addScaled(self: Vector, other: Vector, scale: float) Vector {
         return .{
-            .u = self.u + other.u * scale,
+            .h = self.h + other.h * scale,
             .v = self.v + other.v * scale,
         };
     }
@@ -46,7 +46,7 @@ pub const Position = struct {
 
     pub fn screenPosition(self: *const Position, alpha: float) screen.Vector {
         return .{
-            .u = @intFromFloat(@round(self.previous.u + (self.current.u - self.previous.u) * alpha)),
+            .h = @intFromFloat(@round(self.previous.h + (self.current.h - self.previous.h) * alpha)),
             .v = @intFromFloat(@round(self.previous.v + (self.current.v - self.previous.v) * alpha)),
         };
     }
@@ -58,17 +58,17 @@ pub const Position = struct {
     ) rl.Rectangle {
         const pt = self.screenPosition(alpha);
         return .{
-            .x = @floatFromInt(pt.u),
+            .x = @floatFromInt(pt.h),
             .y = @floatFromInt(pt.v),
-            .width = @floatFromInt(size.u),
+            .width = @floatFromInt(size.h),
             .height = @floatFromInt(size.v),
         };
     }
 };
 
 pub const HCollision = union(enum) {
-    left_wall: float,
-    right_wall: float,
+    left: float,
+    right: float,
 };
 
 pub const VCollision = union(enum) {

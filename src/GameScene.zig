@@ -13,7 +13,7 @@ const loader = @import("loader.zig");
 
 const GameScene = @This();
 
-entities: [screen.Vector.tiles.u * screen.Vector.tiles.v]Entity,
+entities: [screen.Vector.tiles.h * screen.Vector.tiles.v]Entity,
 gravity: float,
 
 pub fn load(io: Io, file_path: []const u8) !GameScene {

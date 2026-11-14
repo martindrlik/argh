@@ -34,7 +34,7 @@ const Properties = struct {
         .deceleration = 1000,
         .gravity_fall = 1200,
         .jump_buffer = .fromNanoseconds(physics_step.nanoseconds * 5),
-        .jump_height = 3 * screen.Vector.tile.u,
+        .jump_height = 3 * screen.Vector.tile.v,
         .jump_time_to_peak = 0.4,
         .max_fall_speed = 600,
         .move_speed = 200,
@@ -99,7 +99,6 @@ pub fn physicsStep(self: *Player, scene: *Scene) void {
     self.position.previous = self.position.current;
 
     self.processJump();
-    self.processCoyoteTime();
 
     self.processHorizontalMovement();
     self.processHCollision(scene);
@@ -139,33 +138,7 @@ fn processJump(self: *Player) void {
             self.input.remaining_jump_buffer.nanoseconds - physics_step.nanoseconds,
         ),
     };
-}
 
-fn processHorizontalMovement(self: *Player) void {
-    const target_velocity = self.input.horizontal_input * self.properties.move_speed;
-    const rate = if (self.input.horizontal_input == 0) self.properties.deceleration else self.properties.acceleration;
-    const maximum_change = rate * physics_step_seconds;
-    if (self.velocity.u < target_velocity) {
-        self.velocity.u = @min(
-            self.velocity.u + maximum_change,
-            target_velocity,
-        );
-    } else {
-        self.velocity.u = @max(
-            self.velocity.u - maximum_change,
-            target_velocity,
-        );
-    }
-    self.position.current.u += self.velocity.u * physics_step_seconds;
-}
-
-fn processGravity(self: *Player) void {
-    self.velocity.v += self.properties.gravity(self.velocity.v) * physics_step_seconds;
-    self.velocity.v = @min(self.velocity.v, self.properties.max_fall_speed);
-    self.position.current.v += self.velocity.v * physics_step_seconds;
-}
-
-fn processCoyoteTime(self: *Player) void {
     if (self.is_grounded) {
         self.input.remaining_coyote_time = self.properties.coyote_time;
     } else {
@@ -176,16 +149,40 @@ fn processCoyoteTime(self: *Player) void {
     }
 }
 
+fn processHorizontalMovement(self: *Player) void {
+    const target_velocity = self.input.horizontal_input * self.properties.move_speed;
+    const rate = if (self.input.horizontal_input == 0) self.properties.deceleration else self.properties.acceleration;
+    const maximum_change = rate * physics_step_seconds;
+    if (self.velocity.h < target_velocity) {
+        self.velocity.h = @min(
+            self.velocity.h + maximum_change,
+            target_velocity,
+        );
+    } else {
+        self.velocity.h = @max(
+            self.velocity.h - maximum_change,
+            target_velocity,
+        );
+    }
+    self.position.current.h += self.velocity.h * physics_step_seconds;
+}
+
+fn processGravity(self: *Player) void {
+    self.velocity.v += self.properties.gravity(self.velocity.v) * physics_step_seconds;
+    self.velocity.v = @min(self.velocity.v, self.properties.max_fall_speed);
+    self.position.current.v += self.velocity.v * physics_step_seconds;
+}
+
 fn processHCollision(self: *Player, scene: *Scene) void {
-    if (self.position.current.u != self.position.previous.u) {
+    if (self.position.current.h != self.position.previous.h) {
         if (scene.checkHCollision(self.entity())) |hc| switch (hc) {
-            .left_wall => |u| {
-                self.velocity.u = 0;
-                self.position.current.u = u - self.properties.floatSize().u;
+            .left => |surface| {
+                self.velocity.h = 0;
+                self.position.current.h = surface - self.properties.floatSize().h;
             },
-            .right_wall => |u| {
-                self.velocity.u = 0;
-                self.position.current.u = u;
+            .right => |surface| {
+                self.velocity.h = 0;
+                self.position.current.h = surface;
             },
         };
     }
@@ -196,14 +193,14 @@ fn processVCollision(self: *Player, scene: *Scene) void {
 
     if (self.position.current.v != self.position.previous.v) {
         if (scene.checkVCollision(self.entity())) |vc| switch (vc) {
-            .ceiling => |v| {
+            .ceiling => |surface| {
                 self.velocity.v = 0;
-                self.position.current.v = v;
+                self.position.current.v = surface;
             },
-            .ground => |v| {
+            .ground => |surface| {
                 self.is_grounded = true;
                 self.velocity.v = 0;
-                self.position.current.v = v - self.properties.floatSize().v;
+                self.position.current.v = surface - self.properties.floatSize().v;
             },
         };
     }

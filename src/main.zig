@@ -12,7 +12,7 @@ const screen_size = core.screen.Vector.screen;
 pub fn main(init: std.process.Init) !void {
     var engine: Engine = try .init(init.io);
 
-    rl.initWindow(screen_size.u, screen_size.v, "argh");
+    rl.initWindow(screen_size.h, screen_size.v, "argh");
     defer rl.closeWindow();
 
     rl.setTargetFPS(120);

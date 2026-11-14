@@ -6,6 +6,7 @@ pub const closeWindow = rl.closeWindow;
 pub const endDrawing = rl.endDrawing;
 pub const frameTime = rl.getFrameTime;
 pub const initWindow = rl.initWindow;
+pub const isKeyDown = rl.isKeyDown;
 pub const isKeyPressed = rl.isKeyPressed;
 pub const isKeyReleased = rl.isKeyReleased;
 pub const setTargetFPS = rl.setTargetFPS;

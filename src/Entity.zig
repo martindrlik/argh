@@ -42,7 +42,7 @@ pub const Entity = union(enum) {
 
     pub fn size(self: *const Entity) screen.Vector {
         return switch (self.*) {
-            .player => Player.size,
+            .player => Player.bounds.size,
             .platform => |platform| platform.size,
             .empty => .tile,
         };

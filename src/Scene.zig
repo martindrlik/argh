@@ -63,6 +63,7 @@ pub const Scene = union(enum) {
         const entity_width: float = @floatFromInt(entity.size().u);
         const entity_height: float = @floatFromInt(entity.size().v);
         const entity_right = entity_position.current.u + entity_width;
+
         for (self.entities()) |*other| {
             if (entity == other) {
                 continue;
@@ -73,16 +74,28 @@ pub const Scene = union(enum) {
             const other_right = other_position.current.u + other_width;
             const other_bottom = other_position.current.v + other_height;
 
-            if (entity_right < other_position.current.u or
-                entity_position.current.u > other_right)
+            // we need horizontal overlap
+            if (entity_right <= other_position.current.u or
+                entity_position.current.u >= other_right)
             {
                 continue;
             }
 
             if (entity_position.previous.v < entity_position.current.v) {
-                if (entity_position.current.v + entity_height > other_position.current.v) return .{ .ground = other_position.current.v };
+                const previous_bottom = entity_position.previous.v + entity_height;
+                const current_bottom = entity_position.current.v + entity_height;
+
+                if (previous_bottom <= other_position.current.v and
+                    current_bottom >= other_position.current.v)
+                {
+                    return .{ .ground = other_position.current.v };
+                }
             } else if (entity_position.previous.v > entity_position.current.v) {
-                if (entity_position.current.v < other_bottom) return .{ .ceiling = other_bottom };
+                if (entity_position.previous.v >= other_bottom and
+                    entity_position.current.v <= other_bottom)
+                {
+                    return .{ .ceiling = other_bottom };
+                }
             }
         }
         return null;

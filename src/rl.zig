@@ -1,0 +1,12 @@
+const rl = @import("raylib");
+pub const Rectangle = rl.Rectangle;
+pub const beginDrawing = rl.beginDrawing;
+pub const clearBackground = rl.clearBackground;
+pub const closeWindow = rl.closeWindow;
+pub const endDrawing = rl.endDrawing;
+pub const frameTime = rl.getFrameTime;
+pub const initWindow = rl.initWindow;
+pub const isKeyPressed = rl.isKeyPressed;
+pub const isKeyReleased = rl.isKeyReleased;
+pub const setTargetFPS = rl.setTargetFPS;
+pub const windowShouldClose = rl.windowShouldClose;

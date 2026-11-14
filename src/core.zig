@@ -1,19 +1,9 @@
-const rl = @import("raylib");
-pub const beginDrawing = rl.beginDrawing;
-pub const clearBackground = rl.clearBackground;
-pub const closeWindow = rl.closeWindow;
-pub const endDrawing = rl.endDrawing;
-pub const frameTime = rl.getFrameTime;
-pub const initWindow = rl.initWindow;
-pub const isKeyPressed = rl.isKeyPressed;
-pub const setTargetFPS = rl.setTargetFPS;
-pub const windowShouldClose = rl.windowShouldClose;
-
 pub const Engine = @import("Engine.zig");
 pub const Entity = @import("Entity.zig").Entity;
 pub const GameScene = @import("GameScene.zig");
 pub const Platfrom = @import("Platform.zig");
 pub const Player = @import("Player.zig");
+pub const rl = @import("rl.zig");
 pub const Scene = @import("scene.zig").Scene;
 pub const screen = @import("screen.zig");
 

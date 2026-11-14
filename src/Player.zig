@@ -20,6 +20,8 @@ pub const coyote_time: Duration = .fromNanoseconds(physics_step.nanoseconds * 5)
 pub const size: screen.Vector = .tile;
 
 is_grounded: bool,
+is_jump_released: bool = true,
+vertical_velocity: float = 400,
 position: Position,
 remaining_coyote_time: Duration,
 remaining_jump_buffer: Duration,
@@ -60,10 +62,16 @@ pub fn physicsStep(self: *Player, scene: *Scene) void {
 fn processJump(self: *Player) void {
     const can_jump = self.is_grounded or self.remaining_coyote_time.nanoseconds > 0;
     if (self.remaining_jump_buffer.nanoseconds > 0 and can_jump) {
-        self.velocity.v = -300;
+        self.velocity.v = -self.vertical_velocity;
         self.is_grounded = false;
         self.remaining_jump_buffer = .zero;
         self.remaining_coyote_time = .zero;
+    }
+    if (self.is_jump_released) {
+        if (self.velocity.v < 0) {
+            self.velocity.v *= 0.5;
+        }
+        self.is_jump_released = false;
     }
     self.remaining_jump_buffer = .{
         .nanoseconds = @max(

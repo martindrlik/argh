@@ -9,7 +9,7 @@ const Position = core.Position;
 const screen = core.screen;
 
 pub fn loadGameLevel(io: Io, file_path: []const u8, layer: *GameLayer) !void {
-    var buffer: [screen.Vector.tiles.h * screen.Vector.tiles.v + screen.Vector.tiles.v]u8 = undefined;
+    var buffer: [screen.Vector.map_tile_size.h * screen.Vector.map_tile_size.v + screen.Vector.map_tile_size.v]u8 = undefined;
     const map = try std.Io.Dir.cwd().readFile(io, file_path, &buffer);
     var lines = std.mem.splitScalar(u8, map, '\n');
 

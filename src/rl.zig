@@ -8,6 +8,7 @@ pub const closeWindow = rl.closeWindow;
 pub const drawTexture = rl.drawTexture;
 pub const endDrawing = rl.endDrawing;
 pub const endMode2D = rl.endMode2D;
+pub const float = f32;
 pub const frameTime = rl.getFrameTime;
 pub const initWindow = rl.initWindow;
 pub const isKeyDown = rl.isKeyDown;

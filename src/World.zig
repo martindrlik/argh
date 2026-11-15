@@ -65,10 +65,41 @@ pub fn draw(self: *World, alpha: float) void {
         };
     }
 
+    self.clampCamera();
+
     rl.beginMode2D(self.camera);
     defer rl.endMode2D();
 
     for (&self.layers) |*layer| switch (layer.*) {
         .game => |game| game.draw(alpha),
     };
+}
+
+fn clampCamera(self: *World) void {
+    const map_width: rl.float = @floatFromInt(screen.Vector.map_tile_size.h * screen.Vector.tile.h);
+    const map_height: rl.float = @floatFromInt(screen.Vector.map_tile_size.v * screen.Vector.tile.v);
+
+    const screen_width: rl.float = @floatFromInt(screen.Vector.screen.h);
+    const screen_height: rl.float = @floatFromInt(screen.Vector.screen.v);
+
+    const half_width = screen_width / (2 * self.camera.zoom);
+    const half_height = screen_height / (2 * self.camera.zoom);
+
+    self.camera.target.x = if (map_width <= 2 * half_width)
+        map_width / 2
+    else
+        std.math.clamp(
+            self.camera.target.x,
+            half_width,
+            map_width - half_width,
+        );
+
+    self.camera.target.y = if (map_height <= 2 * half_height)
+        map_height / 2
+    else
+        std.math.clamp(
+            self.camera.target.y,
+            half_height,
+            map_height - half_height,
+        );
 }

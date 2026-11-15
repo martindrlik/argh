@@ -72,7 +72,15 @@ pub fn draw(self: *World, alpha: float) void {
             self.camera.target.x = player_center_x - dead_zone_half_width;
         }
 
-        self.camera.target.y = rec.y + rec.height / 2;
+        const player_center_y = rec.y + rec.height / 2;
+        const top = self.camera.target.y - 100;
+        const bottom = self.camera.target.y + 60;
+
+        if (player_center_y < top) {
+            self.camera.target.y = player_center_y + 100;
+        } else if (player_center_y > bottom) {
+            self.camera.target.y = player_center_y - 60;
+        }
     }
 
     self.clampCamera();

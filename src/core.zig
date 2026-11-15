@@ -4,6 +4,7 @@ pub const GameLayer = @import("GameLayer.zig");
 pub const Layer = @import("layer.zig").Layer;
 pub const Platfrom = @import("Platform.zig");
 pub const Player = @import("Player.zig");
+pub const Properties = @import("Properties.zig");
 pub const rl = @import("rl.zig");
 pub const screen = @import("screen.zig");
 pub const World = @import("World.zig");

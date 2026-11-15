@@ -59,10 +59,20 @@ pub fn draw(self: *World, alpha: float) void {
             player.properties.size,
             alpha,
         );
-        self.camera.target = .{
-            .x = rec.x + rec.width / 2,
-            .y = rec.y + rec.height / 2,
-        };
+
+        const player_center_x = rec.x + rec.width / 2;
+        const dead_zone_half_width: rl.float = 80;
+
+        const left = self.camera.target.x - dead_zone_half_width;
+        const right = self.camera.target.x + dead_zone_half_width;
+
+        if (player_center_x < left) {
+            self.camera.target.x = player_center_x + dead_zone_half_width;
+        } else if (player_center_x > right) {
+            self.camera.target.x = player_center_x - dead_zone_half_width;
+        }
+
+        self.camera.target.y = rec.y + rec.height / 2;
     }
 
     self.clampCamera();

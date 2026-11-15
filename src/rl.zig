@@ -1,4 +1,5 @@
 const rl = @import("raylib");
+pub const Camera2D = rl.Camera2D;
 pub const Rectangle = rl.Rectangle;
 pub const beginDrawing = rl.beginDrawing;
 pub const clearBackground = rl.clearBackground;

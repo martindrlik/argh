@@ -2,13 +2,13 @@ const std = @import("std");
 const Io = std.Io;
 
 const core = @import("core.zig");
-const GameScene = core.GameScene;
+const GameLayer = core.GameLayer;
 const Player = core.Player;
 const Platform = core.Platfrom;
 const Position = core.Position;
 const screen = core.screen;
 
-pub fn loadGameScene(io: Io, file_path: []const u8, scene: *GameScene) !void {
+pub fn loadGameLevel(io: Io, file_path: []const u8, scene: *GameLayer) !void {
     var buffer: [screen.Vector.tiles.h * screen.Vector.tiles.v + screen.Vector.tiles.v]u8 = undefined;
     const map = try std.Io.Dir.cwd().readFile(io, file_path, &buffer);
     var lines = std.mem.splitScalar(u8, map, '\n');

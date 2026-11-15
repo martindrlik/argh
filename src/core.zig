@@ -1,11 +1,12 @@
 pub const Engine = @import("Engine.zig");
 pub const Entity = @import("Entity.zig").Entity;
-pub const GameScene = @import("GameScene.zig");
+pub const GameLayer = @import("GameLayer.zig");
 pub const Platfrom = @import("Platform.zig");
 pub const Player = @import("Player.zig");
 pub const rl = @import("rl.zig");
-pub const Scene = @import("scene.zig").Scene;
 pub const screen = @import("screen.zig");
+pub const World = @import("World.zig");
+pub const Layer = World.Layer;
 
 pub const float = f64;
 

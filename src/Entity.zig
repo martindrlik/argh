@@ -1,6 +1,6 @@
 const core = @import("core.zig");
 const float = core.float;
-const Scene = core.Scene;
+const Layer = core.Layer;
 const Engine = core.Engine;
 const physics_step_seconds = Engine.physics_step_seconds;
 const Platform = core.Platfrom;
@@ -16,9 +16,9 @@ pub const Entity = union(enum) {
 
     pub const Empty = struct {};
 
-    pub fn physicsStep(self: *Entity, scene: *Scene) void {
+    pub fn physicsStep(self: *Entity, layer: *Layer) void {
         switch (self.*) {
-            .player => |*player| player.physicsStep(scene),
+            .player => |*player| player.physicsStep(layer),
             .platform => |*platform| platform.physicsStep(),
             .empty => {},
         }

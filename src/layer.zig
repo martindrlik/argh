@@ -1,32 +1,32 @@
 const core = @import("core.zig");
 const float = core.float;
-const GameScene = core.GameScene;
+const GameLayer = core.GameLayer;
 const Entity = core.Entity;
 const HCollision = core.HCollision;
 const VCollision = core.VCollision;
 
-pub const Scene = union(enum) {
-    game: GameScene,
+pub const Layer = union(enum) {
+    game: GameLayer,
 
-    pub fn gravity(self: *Scene) float {
+    pub fn gravity(self: *Layer) float {
         return switch (self.*) {
             .game => |*game| game.gravity,
         };
     }
 
-    pub fn entities(self: *const Scene) []const Entity {
+    pub fn entities(self: *const Layer) []const Entity {
         return switch (self.*) {
             .game => |*game| &game.entities,
         };
     }
 
-    pub fn physicsStep(self: *Scene) void {
+    pub fn physicsStep(self: *Layer) void {
         switch (self.*) {
             .game => |*game| game.physicsStep(self),
         }
     }
 
-    pub fn horizontalCollision(self: *const Scene, entity: *const Entity) ?HCollision {
+    pub fn horizontalCollision(self: *const Layer, entity: *const Entity) ?HCollision {
         const entity_position = entity.position();
         const entity_width: float = @floatFromInt(entity.size().h);
         const entity_height: float = @floatFromInt(entity.size().v);
@@ -78,7 +78,7 @@ pub const Scene = union(enum) {
     }
 
     pub fn verticalCollision(
-        self: *const Scene,
+        self: *const Layer,
         entity: *const Entity,
         start_v: float,
     ) ?VCollision {
@@ -132,7 +132,7 @@ pub const Scene = union(enum) {
         return null;
     }
 
-    pub fn draw(self: *const Scene, alpha: f64) void {
+    pub fn draw(self: *const Layer, alpha: f64) void {
         switch (self.*) {
             .game => |game| game.draw(alpha),
         }

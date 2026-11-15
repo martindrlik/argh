@@ -5,7 +5,7 @@ const rl = @import("raylib");
 
 const core = @import("core.zig");
 const Position = core.Position;
-const Scene = core.Scene;
+const Layer = core.Layer;
 const Vector = core.Vector;
 const float = core.float;
 const Engine = core.Engine;
@@ -87,19 +87,19 @@ pub fn new(position: Position, is_grounded: bool) Player {
     };
 }
 
+pub fn parentEntity(self: *Player) *Entity {
+    return @fieldParentPtr("player", self);
+}
+
 pub fn requestJump(self: *Player) void {
     self.input.remaining_jump_buffer = self.properties.jump_buffer;
 }
 
-pub fn entity(self: *Player) *Entity {
-    return @fieldParentPtr("player", self);
-}
-
-pub fn physicsStep(self: *Player, scene: *Scene) void {
+pub fn physicsStep(self: *Player, layer: *Layer) void {
     self.position.previous = self.position.current;
     self.jump();
-    self.horizontalMovement(scene);
-    self.verticalMovement(scene);
+    self.horizontalMovement(layer);
+    self.verticalMovement(layer);
 }
 
 fn jump(self: *Player) void {
@@ -146,7 +146,7 @@ fn jump(self: *Player) void {
 
 fn horizontalMovement(
     self: *Player,
-    scene: *Scene,
+    scene: *Layer,
 ) void {
     const target_velocity = self.input.horizontal_input * self.properties.move_speed;
     const rate = if (self.input.horizontal_input == 0) self.properties.deceleration else self.properties.acceleration;
@@ -168,7 +168,7 @@ fn horizontalMovement(
 
 fn verticalMovement(
     self: *Player,
-    scene: *Scene,
+    scene: *Layer,
 ) void {
     var remaining = physics_step_seconds;
     const max_speed = self.properties.max_fall_speed;
@@ -209,7 +209,7 @@ fn verticalMovement(
             initial_velocity * duration +
             0.5 * gravity * duration * duration;
 
-        if (scene.verticalCollision(self.entity(), start_v)) |collision| {
+        if (scene.verticalCollision(self.parentEntity(), start_v)) |collision| {
             const contact_v = switch (collision) {
                 .ceiling => |surface| surface,
                 .ground => |surface| surface - self.properties.floatSize().v,
@@ -269,10 +269,10 @@ fn timeToVerticalContact(
 
 fn horizontalCollision(
     self: *Player,
-    scene: *Scene,
+    scene: *Layer,
 ) void {
     if (self.position.current.h != self.position.previous.h) {
-        if (scene.horizontalCollision(self.entity())) |hc| switch (hc) {
+        if (scene.horizontalCollision(self.parentEntity())) |hc| switch (hc) {
             .left => |surface| {
                 self.velocity.h = 0;
                 self.position.current.h = surface - self.properties.floatSize().h;

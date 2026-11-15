@@ -97,17 +97,12 @@ pub fn entity(self: *Player) *Entity {
 
 pub fn physicsStep(self: *Player, scene: *Scene) void {
     self.position.previous = self.position.current;
-
-    self.processJump();
-
-    self.processHorizontalMovement();
-    self.processHCollision(scene);
-
-    self.processGravity();
-    self.processVCollision(scene);
+    self.jump();
+    self.horizontalMovement(scene);
+    self.verticalMovement(scene);
 }
 
-fn processJump(self: *Player) void {
+fn jump(self: *Player) void {
     const can_jump =
         self.is_grounded or
         self.input.remaining_coyote_time.nanoseconds > 0;
@@ -149,7 +144,10 @@ fn processJump(self: *Player) void {
     }
 }
 
-fn processHorizontalMovement(self: *Player) void {
+fn horizontalMovement(
+    self: *Player,
+    scene: *Scene,
+) void {
     const target_velocity = self.input.horizontal_input * self.properties.move_speed;
     const rate = if (self.input.horizontal_input == 0) self.properties.deceleration else self.properties.acceleration;
     const maximum_change = rate * physics_step_seconds;
@@ -165,25 +163,116 @@ fn processHorizontalMovement(self: *Player) void {
         );
     }
     self.position.current.h += self.velocity.h * physics_step_seconds;
+    self.horizontalCollision(scene);
 }
 
-fn processGravity(self: *Player) void {
-    const velocity_before = self.velocity.v;
-    const gravity = self.properties.gravity(velocity_before);
+fn verticalMovement(
+    self: *Player,
+    scene: *Scene,
+) void {
+    var remaining = physics_step_seconds;
+    const max_speed = self.properties.max_fall_speed;
 
-    self.velocity.v += gravity * physics_step_seconds;
-    self.velocity.v = @min(
-        self.velocity.v,
-        self.properties.max_fall_speed,
+    self.is_grounded = false;
+    self.velocity.v = @min(self.velocity.v, max_speed);
+
+    while (remaining > 0) {
+        const start_v = self.position.current.v;
+        const initial_velocity = self.velocity.v;
+        const rising = initial_velocity < 0;
+
+        const gravity: float = if (rising)
+            self.properties.gravity(initial_velocity)
+        else if (initial_velocity < max_speed)
+            self.properties.gravity_fall
+        else
+            0;
+
+        var duration = remaining;
+        var boundary_velocity: ?float = null;
+
+        if (rising) {
+            const time_to_peak = -initial_velocity / gravity;
+            if (time_to_peak <= duration) {
+                duration = time_to_peak;
+                boundary_velocity = 0;
+            }
+        } else if (gravity > 0) {
+            const time_to_cap = (max_speed - initial_velocity) / gravity;
+            if (time_to_cap <= duration) {
+                duration = time_to_cap;
+                boundary_velocity = max_speed;
+            }
+        }
+
+        self.position.current.v = start_v +
+            initial_velocity * duration +
+            0.5 * gravity * duration * duration;
+
+        if (scene.verticalCollision(self.entity(), start_v)) |collision| {
+            const contact_v = switch (collision) {
+                .ceiling => |surface| surface,
+                .ground => |surface| surface - self.properties.floatSize().v,
+            };
+
+            const impact_time = timeToVerticalContact(
+                initial_velocity,
+                gravity,
+                contact_v - start_v,
+            );
+
+            const consumed = @max(0, @min(duration, impact_time));
+            remaining = @max(0, remaining - consumed);
+
+            self.position.current.v = contact_v;
+            self.velocity.v = 0;
+
+            switch (collision) {
+                .ground => {
+                    self.is_grounded = true;
+                    return;
+                },
+                .ceiling => {
+                    // Continue with falling gravity for the remaining time.
+                },
+            }
+        } else {
+            self.velocity.v = boundary_velocity orelse
+                (initial_velocity + gravity * duration);
+
+            remaining = @max(0, remaining - duration);
+        }
+    }
+}
+
+fn timeToVerticalContact(
+    velocity: float,
+    gravity: float,
+    distance: float,
+) float {
+    if (distance == 0) return 0;
+    if (gravity == 0) return distance / velocity;
+
+    const discriminant = @max(
+        0,
+        velocity * velocity + 2 * gravity * distance,
     );
+    const speed_at_contact = @sqrt(discriminant);
 
-    const average_velocity = (velocity_before + self.velocity.v) * 0.5;
-    self.position.current.v += average_velocity * physics_step_seconds;
+    const denominator = if (velocity < 0)
+        velocity - speed_at_contact
+    else
+        velocity + speed_at_contact;
+
+    return 2 * distance / denominator;
 }
 
-fn processHCollision(self: *Player, scene: *Scene) void {
+fn horizontalCollision(
+    self: *Player,
+    scene: *Scene,
+) void {
     if (self.position.current.h != self.position.previous.h) {
-        if (scene.checkHCollision(self.entity())) |hc| switch (hc) {
+        if (scene.horizontalCollision(self.entity())) |hc| switch (hc) {
             .left => |surface| {
                 self.velocity.h = 0;
                 self.position.current.h = surface - self.properties.floatSize().h;
@@ -196,25 +285,10 @@ fn processHCollision(self: *Player, scene: *Scene) void {
     }
 }
 
-fn processVCollision(self: *Player, scene: *Scene) void {
-    self.is_grounded = false;
-
-    if (self.position.current.v != self.position.previous.v) {
-        if (scene.checkVCollision(self.entity())) |vc| switch (vc) {
-            .ceiling => |surface| {
-                self.velocity.v = 0;
-                self.position.current.v = surface;
-            },
-            .ground => |surface| {
-                self.is_grounded = true;
-                self.velocity.v = 0;
-                self.position.current.v = surface - self.properties.floatSize().v;
-            },
-        };
-    }
-}
-
-pub fn draw(self: *const Player, alpha: float) void {
+pub fn draw(
+    self: *const Player,
+    alpha: float,
+) void {
     const rec = self.position.screenRectangle(self.properties.size, alpha);
     rl.drawRectangleRec(rec, .blue);
 }

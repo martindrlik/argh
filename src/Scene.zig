@@ -26,7 +26,7 @@ pub const Scene = union(enum) {
         }
     }
 
-    pub fn checkHCollision(self: *const Scene, entity: *const Entity) ?HCollision {
+    pub fn horizontalCollision(self: *const Scene, entity: *const Entity) ?HCollision {
         const entity_position = entity.position();
         const entity_width: float = @floatFromInt(entity.size().h);
         const entity_height: float = @floatFromInt(entity.size().v);
@@ -77,7 +77,11 @@ pub const Scene = union(enum) {
         return null;
     }
 
-    pub fn checkVCollision(self: *const Scene, entity: *const Entity) ?VCollision {
+    pub fn verticalCollision(
+        self: *const Scene,
+        entity: *const Entity,
+        start_v: float,
+    ) ?VCollision {
         const entity_position = entity.position();
         const entity_width: float = @floatFromInt(entity.size().h);
         const entity_height: float = @floatFromInt(entity.size().v);
@@ -101,8 +105,8 @@ pub const Scene = union(enum) {
                 continue;
             }
 
-            if (entity_position.previous.v < entity_position.current.v) {
-                const previous_bottom = entity_position.previous.v + entity_height;
+            if (start_v < entity_position.current.v) {
+                const previous_bottom = start_v + entity_height;
                 const current_bottom = entity_position.current.v + entity_height;
 
                 if (previous_bottom <= other_position.current.v and
@@ -111,8 +115,8 @@ pub const Scene = union(enum) {
                     const surface = other_position.current.v;
                     nearest = if (nearest) |previous| @min(previous, surface) else surface;
                 }
-            } else if (entity_position.previous.v > entity_position.current.v) {
-                if (entity_position.previous.v >= other_bottom and
+            } else if (start_v > entity_position.current.v) {
+                if (start_v >= other_bottom and
                     entity_position.current.v <= other_bottom)
                 {
                     nearest = if (nearest) |previous| @max(previous, other_bottom) else other_bottom;
@@ -120,7 +124,7 @@ pub const Scene = union(enum) {
             }
         }
         if (nearest) |surface| {
-            return if (entity_position.current.v > entity_position.previous.v)
+            return if (entity_position.current.v > start_v)
                 .{ .ground = surface }
             else
                 .{ .ceiling = surface };

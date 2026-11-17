@@ -8,12 +8,6 @@ const VCollision = core.VCollision;
 pub const Layer = union(enum) {
     game: GameLayer,
 
-    pub fn gravity(self: *Layer) float {
-        return switch (self.*) {
-            .game => |*game| game.gravity,
-        };
-    }
-
     pub fn entities(self: *const Layer) []const Entity {
         return switch (self.*) {
             .game => |*game| &game.entities,

@@ -14,12 +14,10 @@ const loader = @import("loader.zig");
 const GameLayer = @This();
 
 entities: [screen.Vector.map_tile_size.h * screen.Vector.map_tile_size.v]Entity,
-gravity: float,
 
 pub fn load(io: Io, file_path: []const u8) !GameLayer {
     var game = GameLayer{
         .entities = undefined,
-        .gravity = 500,
     };
     try loader.loadGameLevel(io, file_path, &game);
     return game;

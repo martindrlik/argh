@@ -1,3 +1,4 @@
+pub const Camera = @import("Camera.zig");
 pub const Engine = @import("Engine.zig");
 pub const Entity = @import("Entity.zig").Entity;
 pub const GameLayer = @import("GameLayer.zig");
@@ -16,6 +17,11 @@ pub const Vector = struct {
     v: float,
 
     pub const zero: Vector = .{ .h = 0.0, .v = 0.0 };
+
+    pub const map_size: Vector = .new(
+        screen.Vector.map_tile_size.h * screen.Vector.tile.h,
+        screen.Vector.map_tile_size.v * screen.Vector.tile.v,
+    );
 
     pub fn new(h: float, v: float) Vector {
         return .{ .h = h, .v = v };

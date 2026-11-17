@@ -24,12 +24,26 @@ camera: Camera,
 layers: [1]Layer,
 
 pub fn init(io: Io, level_file_path: []const u8) !World {
-    return .{
+    var world: World = .{
         .camera = .init(),
-        .layers = @splat(Layer{
-            .game = try .load(io, level_file_path),
-        }),
+        .layers = .{
+            .{ .game = try .load(io, level_file_path) },
+        },
     };
+
+    if (world.queryMut(Player)) |player| {
+        world.camera.snapToEntity(
+            player.position,
+            player.properties.size,
+        );
+    }
+
+    world.camera.clamp(
+        screen.Vector.screen,
+        core.Vector.map_size,
+    );
+
+    return world;
 }
 
 pub fn queryMut(self: *World, comptime T: type) ?*T {

@@ -27,6 +27,19 @@ pub fn init() Camera {
     };
 }
 
+pub fn snapToEntity(
+    self: *Camera,
+    entity_position: Position,
+    entity_size: screen.Vector,
+) void {
+    const size = core.Vector.fromScreenVector(entity_size);
+
+    self.camera.target = .{
+        .x = @floatCast(entity_position.current.h + size.h / 2),
+        .y = @floatCast(entity_position.current.v + size.v / 2),
+    };
+}
+
 pub fn followEntity(
     self: *Camera,
     entity_position: Position,

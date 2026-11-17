@@ -2,6 +2,7 @@ const rl = @import("raylib");
 pub const Camera2D = rl.Camera2D;
 pub const Rectangle = rl.Rectangle;
 pub const beginDrawing = rl.beginDrawing;
+pub const beginMode2D = rl.beginMode2D;
 pub const clearBackground = rl.clearBackground;
 pub const closeWindow = rl.closeWindow;
 pub const drawTexture = rl.drawTexture;
@@ -17,10 +18,4 @@ pub const setTargetFPS = rl.setTargetFPS;
 pub const unloadTexture = rl.unloadTexture;
 pub const windowShouldClose = rl.windowShouldClose;
 
-const Camera = @import("Camera.zig");
-
 pub const float = f32;
-
-pub fn beginMode2D(camera: Camera) void {
-    rl.beginMode2D(camera.camera);
-}

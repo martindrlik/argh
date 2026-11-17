@@ -1,4 +1,3 @@
-pub const Camera = @import("Camera.zig");
 pub const Engine = @import("Engine.zig");
 pub const Entity = @import("Entity.zig").Entity;
 pub const GameLayer = @import("GameLayer.zig");

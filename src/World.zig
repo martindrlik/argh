@@ -49,9 +49,14 @@ pub fn physicsStep(self: *World) void {
     };
 }
 
-pub fn draw(self: *World, alpha: float) void {
+pub fn draw(self: *World, alpha: float, elapsed_seconds: float) void {
     if (self.queryMut(Player)) |player| {
-        self.camera.followEntity(player.position, player.properties.size, alpha);
+        self.camera.followEntity(
+            player.position,
+            player.properties.size,
+            alpha,
+            elapsed_seconds,
+        );
     }
 
     self.camera.clamp(screen.Vector.screen, core.Vector.map_size);

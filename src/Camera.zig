@@ -32,8 +32,11 @@ pub fn followEntity(
     entity_position: Position,
     entity_size: screen.Vector,
     alpha: float,
+    elapsed_seconds: float,
 ) void {
     const rec = entity_position.screenRectangle(entity_size, alpha);
+
+    var desired = self.camera.target;
 
     const entity_center_x = rec.x + rec.width / 2;
     const dead_zone_half_width: rl.float = 80;
@@ -42,9 +45,9 @@ pub fn followEntity(
     const right = self.camera.target.x + dead_zone_half_width;
 
     if (entity_center_x < left) {
-        self.camera.target.x = entity_center_x + dead_zone_half_width;
+        desired.x = entity_center_x + dead_zone_half_width;
     } else if (entity_center_x > right) {
-        self.camera.target.x = entity_center_x - dead_zone_half_width;
+        desired.x = entity_center_x - dead_zone_half_width;
     }
 
     const entity_center_y = rec.y + rec.height / 2;
@@ -52,10 +55,19 @@ pub fn followEntity(
     const bottom = self.camera.target.y + 60;
 
     if (entity_center_y < top) {
-        self.camera.target.y = entity_center_y + 100;
+        desired.y = entity_center_y + 100;
     } else if (entity_center_y > bottom) {
-        self.camera.target.y = entity_center_y - 60;
+        desired.y = entity_center_y - 60;
     }
+
+    const follow_speed: float = 8;
+    const weight: rl.float =
+        @floatCast(1 - @exp(-follow_speed * elapsed_seconds));
+
+    self.camera.target.x +=
+        (desired.x - self.camera.target.x) * weight;
+    self.camera.target.y +=
+        (desired.y - self.camera.target.y) * weight;
 }
 
 pub fn clamp(self: *Camera, screen_size: screen.Vector, map_size: core.Vector) void {

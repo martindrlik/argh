@@ -3,9 +3,10 @@ const Io = std.Io;
 const Duration = std.Io.Duration;
 
 const core = @import("core.zig");
+const Layer = core.Layer;
 const ScreenVector = core.ScreenVector;
 const World = core.World;
-const Layer = core.Layer;
+const float = core.float;
 
 const Engine = @This();
 const max_physics_steps_per_frame: u32 = 5;
@@ -44,12 +45,12 @@ pub fn physicsStep(self: *Engine, elapsed: Duration) void {
     self.accumulator.nanoseconds = @mod(self.accumulator.nanoseconds, physics_step.nanoseconds);
 }
 
-pub fn draw(self: *Engine) void {
-    const accumulator_ns: f64 = @floatFromInt(self.accumulator.nanoseconds);
-    const step_ns: f64 = @floatFromInt(physics_step.nanoseconds);
+pub fn draw(self: *Engine, elapsed_seconds: float) void {
+    const accumulator_ns: float = @floatFromInt(self.accumulator.nanoseconds);
+    const step_ns: float = @floatFromInt(physics_step.nanoseconds);
     const alpha = accumulator_ns / step_ns;
 
     for (&self.worlds) |*world| {
-        world.draw(alpha);
+        world.draw(alpha, elapsed_seconds);
     }
 }
